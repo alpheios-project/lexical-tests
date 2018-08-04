@@ -1,0 +1,10 @@
+<div id="alpheios-lexical-status" data-alpheios-ignore="all">
+	<resultgrid 
+		:resulttable = "resulttable" 
+		:tableready = "tableready"
+		@downloadmorph = "downloadmorph"
+		@downloadshortdef = "downloadshortdef"
+		@downloadfulldef = "downloadfulldef"
+		@getdata = "getdata"
+	></resultgrid>
+</div>
