@@ -29654,6 +29654,7 @@ class Embedded {
   constructor () {
     this.resultsId = 'alpheios-tests-results'
     this.dataController = new _lib_data_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"]()
+    this.dataController.initVue()
   }
 }
 
@@ -29970,11 +29971,9 @@ class DataController {
     this.dataFile = dataFile
     this.configFile = configFile
     this.resultData = new _lib_check_table_js__WEBPACK_IMPORTED_MODULE_5__["default"]()
-
-    this.init()
   }
 
-  async init () {
+  async initVue () {
     await this.loadConfigData()
     await this.loadSourceData()
     this.createVueApp()
@@ -29982,10 +29981,16 @@ class DataController {
   }
 
   async loadConfigData () {
-    let config = await _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].getFileContents(this.configFile)
+    if (this.configFile) {
+      try {
+        let config = await _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].getFileContents(this.configFile)
 
-    this.languages = this.prepareLanguagesConfig(config.languages)
-    this.dictionaries = config.dictionaries
+        this.languages = this.prepareLanguagesConfig(config.languages)
+        this.dictionaries = config.dictionaries
+      } catch (err) {
+        console.error('Some problems with loading config data', err.message)
+      }
+    }
   }
 
   prepareLanguagesConfig (languagesRaw) {
@@ -30000,8 +30005,14 @@ class DataController {
   }
 
   async loadSourceData () {
-    let sourceData = await _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].getFileContents(this.dataFile)
-    this.prepareSourceData(sourceData)
+    if (this.dataFile) {
+      try {
+        let sourceData = await _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].getFileContents(this.dataFile)
+        this.prepareSourceData(sourceData)
+      } catch (err) {
+        console.error('Some problems with loading source data', err.message)
+      }
+    }
   }
 
   prepareSourceData (sourceData) {

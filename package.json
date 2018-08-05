@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alpheios-project/lexical-tests.git"
+    "url": "git://github.com/alpheios-project/lexical-tests.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/alpheios-project/lexical-tests/issues"
+    "url": "git://github.com/alpheios-project/lexical-tests/issues"
   },
-  "homepage": "https://github.com/alpheios-project/lexical-tests#readme",
+  "homepage": "git://github.com/alpheios-project/lexical-tests#readme",
   "devDependencies": {
     "@vue/test-utils": "^1.0.0-beta.20",
     "acorn": "^2.7.0",
@@ -139,7 +139,7 @@
   "standard": {
     "ignore": [
       "**/dist",
-      "**/tests/test-bundle.js"
+      "**/cmdtool"
     ]
   }
 }

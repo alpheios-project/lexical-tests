@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-import { LanguageModelFactory as LMF, Lexeme, Lemma, Homonym, Constants } from 'alpheios-data-models'
 import { AlpheiosTuftsAdapter } from 'alpheios-morph-client'
 import {Lexicons} from 'alpheios-lexicon-client'
 

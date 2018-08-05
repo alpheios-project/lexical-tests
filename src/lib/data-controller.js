@@ -17,11 +17,9 @@ export default class DataController {
     this.dataFile = dataFile
     this.configFile = configFile
     this.resultData = new CheckTable()
-
-    this.init()
   }
 
-  async init () {
+  async initVue () {
     await this.loadConfigData()
     await this.loadSourceData()
     this.createVueApp()
@@ -29,10 +27,16 @@ export default class DataController {
   }
 
   async loadConfigData () {
-    let config = await FileController.getFileContents(this.configFile)
+    if (this.configFile) {
+      try {
+        let config = await FileController.getFileContents(this.configFile)
 
-    this.languages = this.prepareLanguagesConfig(config.languages)
-    this.dictionaries = config.dictionaries
+        this.languages = this.prepareLanguagesConfig(config.languages)
+        this.dictionaries = config.dictionaries
+      } catch (err) {
+        console.error('Some problems with loading config data', err.message)
+      }
+    }
   }
 
   prepareLanguagesConfig (languagesRaw) {
@@ -47,8 +51,14 @@ export default class DataController {
   }
 
   async loadSourceData () {
-    let sourceData = await FileController.getFileContents(this.dataFile)
-    this.prepareSourceData(sourceData)
+    if (this.dataFile) {
+      try {
+        let sourceData = await FileController.getFileContents(this.dataFile)
+        this.prepareSourceData(sourceData)
+      } catch (err) {
+        console.error('Some problems with loading source data', err.message)
+      }
+    }
   }
 
   prepareSourceData (sourceData) {
