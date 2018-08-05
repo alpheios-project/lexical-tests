@@ -7,6 +7,7 @@
         </label>
         <p class="alpheios-result-grid__file_name" v-if="file">{{ file.name }}, {{ fileSize }}Kb</p>
         <button v-on:click="uploadFile()" class="alpheios-result-grid__upload_file" :class="disabledClass(file)">Upload data</button>
+        <p class="alpheios-result-grid__file_name" v-if="sourceData">Words - {{ sourceData.length }}</p>
         <button v-on:click="checkData()" class="alpheios-result-grid__upload_file" :class="disabledClass(sourceData)">Check data</button>
       </div> 
     <ul class="alpheios-result-grid__download_list">
@@ -107,6 +108,14 @@
     computed: {
       fileSize () {
       	return this.file ? Math.round(this.file.size/1024*100)/100 : null
+      }
+    },
+    watch: {
+      file () {
+      	this.sourceData = null
+      	if (this.resulttable) {
+      	  this.$emit('clearresulttable')
+      	}
       }
     },
     methods: {

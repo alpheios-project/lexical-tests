@@ -9,8 +9,16 @@ export default class CheckTable {
     this.data = []
   }
 
+  clear (dataController) {
+    this.data = []
+    this.morphData = null
+    this.shortDefData = null
+    this.fullDefData = null
+    Vue.set(dataController.vueApp, 'resulttable', this.data)
+    Vue.set(dataController.vueApp, 'tableready', null)
+  }
+
   async getData (dataController) {
-    console.info('*************************dataController', dataController)
     Vue.set(dataController.vueApp, 'tableready', false)
     let sourceData = dataController.sourceData
     for (let i = 0; i < sourceData.length; i++) {
@@ -30,8 +38,6 @@ export default class CheckTable {
       Vue.set(dataController.vueApp, 'resulttable', this.data)
     }
     Vue.set(dataController.vueApp, 'tableready', true)
-
-    console.info('*****************************this.resultData', this.data)
   }
 
   async getMorphData (lexQuery) {

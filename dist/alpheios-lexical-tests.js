@@ -18046,6 +18046,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
   // import axios from 'axios'
   /* harmony default export */ __webpack_exports__["default"] = ({
@@ -18070,6 +18071,14 @@ __webpack_require__.r(__webpack_exports__);
     computed: {
       fileSize () {
       	return this.file ? Math.round(this.file.size/1024*100)/100 : null
+      }
+    },
+    watch: {
+      file () {
+      	this.sourceData = null
+      	if (this.resulttable) {
+      	  this.$emit('clearresulttable')
+      	}
       }
     },
     methods: {
@@ -18193,6 +18202,12 @@ var render = function() {
         },
         [_vm._v("Upload data")]
       ),
+      _vm._v(" "),
+      _vm.sourceData
+        ? _c("p", { staticClass: "alpheios-result-grid__file_name" }, [
+            _vm._v("Words - " + _vm._s(_vm.sourceData.length))
+          ])
+        : _vm._e(),
       _vm._v(" "),
       _c(
         "button",
@@ -29671,8 +29686,16 @@ class CheckTable {
     this.data = []
   }
 
+  clear (dataController) {
+    this.data = []
+    this.morphData = null
+    this.shortDefData = null
+    this.fullDefData = null
+    vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'resulttable', this.data)
+    vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', null)
+  }
+
   async getData (dataController) {
-    console.info('*************************dataController', dataController)
     vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', false)
     let sourceData = dataController.sourceData
     for (let i = 0; i < sourceData.length; i++) {
@@ -29692,8 +29715,6 @@ class CheckTable {
       vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'resulttable', this.data)
     }
     vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', true)
-
-    console.info('*****************************this.resultData', this.data)
   }
 
   async getMorphData (lexQuery) {
@@ -30065,6 +30086,9 @@ class DataController {
         getdata (sourceData) {
           dataController.prepareSourceData(sourceData)
           dataController.resultData.getData(dataController)
+        },
+        clearresulttable () {
+          dataController.resultData.clear(dataController)
         }
       }
     })
@@ -30255,7 +30279,7 @@ class LexicalQuery {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\r\n\t<resultgrid \r\n\t\t:resulttable = \"resulttable\" \r\n\t\t:tableready = \"tableready\"\r\n\t\t@downloadmorph = \"downloadmorph\"\r\n\t\t@downloadshortdef = \"downloadshortdef\"\r\n\t\t@downloadfulldef = \"downloadfulldef\"\r\n\t\t@getdata = \"getdata\"\r\n\t></resultgrid>\r\n</div>";
+module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\r\n\t<resultgrid \r\n\t\t:resulttable = \"resulttable\" \r\n\t\t:tableready = \"tableready\"\r\n\t\t@downloadmorph = \"downloadmorph\"\r\n\t\t@downloadshortdef = \"downloadshortdef\"\r\n\t\t@downloadfulldef = \"downloadfulldef\"\r\n\t\t@getdata = \"getdata\"\r\n\t\t@clearresulttable = \"clearresulttable\"\r\n\t></resultgrid>\r\n</div>";
 
 /***/ }),
 

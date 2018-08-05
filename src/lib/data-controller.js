@@ -133,6 +133,9 @@ export default class DataController {
         getdata (sourceData) {
           dataController.prepareSourceData(sourceData)
           dataController.resultData.getData(dataController)
+        },
+        clearresulttable () {
+          dataController.resultData.clear(dataController)
         }
       }
     })

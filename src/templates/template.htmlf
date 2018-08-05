@@ -6,5 +6,6 @@
 		@downloadshortdef = "downloadshortdef"
 		@downloadfulldef = "downloadfulldef"
 		@getdata = "getdata"
+		@clearresulttable = "clearresulttable"
 	></resultgrid>
 </div>
