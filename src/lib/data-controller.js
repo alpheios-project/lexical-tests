@@ -23,7 +23,6 @@ export default class DataController {
     await this.loadConfigData()
     await this.loadSourceData()
     this.createVueApp()
-    // this.resultData.getData(this)
   }
 
   async loadConfigData () {
