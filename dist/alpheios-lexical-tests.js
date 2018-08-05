@@ -30024,7 +30024,6 @@ class DataController {
     })
     sourceData.sort(function (a, b) { return a.languageCode < b.languageCode })
     this.sourceData = sourceData
-    console.info('********************prepareSourceData', this.sourceData)
   }
 
   prepareLexicalConfigs (defOpts, languageCode) {
@@ -30176,14 +30175,11 @@ class FileController {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return LexicalQuery; });
-/* harmony import */ var alpheios_data_models__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! alpheios-data-models */ "../node_modules/alpheios-data-models/dist/alpheios-data-models.js");
-/* harmony import */ var alpheios_data_models__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(alpheios_data_models__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var alpheios_morph_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! alpheios-morph-client */ "../node_modules/alpheios-morph-client/dist/alpheios-morph-client.js");
-/* harmony import */ var alpheios_morph_client__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(alpheios_morph_client__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! alpheios-lexicon-client */ "../node_modules/alpheios-lexicon-client/dist/alpheios-lexicon-client.js");
-/* harmony import */ var alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var alpheios_morph_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! alpheios-morph-client */ "../node_modules/alpheios-morph-client/dist/alpheios-morph-client.js");
+/* harmony import */ var alpheios_morph_client__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(alpheios_morph_client__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! alpheios-lexicon-client */ "../node_modules/alpheios-lexicon-client/dist/alpheios-lexicon-client.js");
+/* harmony import */ var alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_1__);
 /* eslint-disable no-unused-vars */
-
 
 
 
@@ -30193,8 +30189,8 @@ class LexicalQuery {
     this.languageID = params.languageID
     this.languageName = params.languageName
 
-    this.maAdapter = new alpheios_morph_client__WEBPACK_IMPORTED_MODULE_1__["AlpheiosTuftsAdapter"]()
-    this.lexicons = alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_2__["Lexicons"]
+    this.maAdapter = new alpheios_morph_client__WEBPACK_IMPORTED_MODULE_0__["AlpheiosTuftsAdapter"]()
+    this.lexicons = alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_1__["Lexicons"]
 
     this.lexiconShortOpts = params.lexiconShortOpts
     this.lexiconFullOpts = params.lexiconFullOpts

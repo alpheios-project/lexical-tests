@@ -70,7 +70,6 @@ export default class DataController {
     })
     sourceData.sort(function (a, b) { return a.languageCode < b.languageCode })
     this.sourceData = sourceData
-    console.info('********************prepareSourceData', this.sourceData)
   }
 
   prepareLexicalConfigs (defOpts, languageCode) {
