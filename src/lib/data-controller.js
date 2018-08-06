@@ -114,6 +114,16 @@ export default class DataController {
     }
   }
 
+  downloadFailedWords () {
+    if (!this.resultData.failedWords) {
+      this.resultData.createFailedWordsDownload()
+    }
+
+    let dt = new Date()
+    let printDt = dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-')
+    FileController.saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: ';'}), printDt + ' - failedWords.csv')
+  }
+
   createVueApp () {
     const dataController = this
     this.vueApp = new Vue({
@@ -137,6 +147,9 @@ export default class DataController {
         },
         downloadfulldef () {
           dataController.downloadFullDef()
+        },
+        downloadfailedwords () {
+          dataController.downloadFailedWords()
         },
         getdata (sourceData) {
           dataController.prepareSourceData(sourceData)

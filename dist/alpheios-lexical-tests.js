@@ -18047,6 +18047,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
   // import axios from 'axios'
   /* harmony default export */ __webpack_exports__["default"] = ({
@@ -18139,6 +18140,11 @@ __webpack_require__.r(__webpack_exports__);
       downloadFullDef () {
         if (this.tableready) {
           this.$emit('downloadfulldef')
+        }
+      },
+      downloadFailedWords () {
+        if (this.tableready) {
+          this.$emit('downloadfailedwords')
         }
       },
       checkData () {
@@ -18250,6 +18256,15 @@ var render = function() {
           on: { click: _vm.downloadFullDef }
         },
         [_vm._v("Download Full Defs")]
+      ),
+      _vm._v(" "),
+      _c(
+        "li",
+        {
+          class: _vm.disabledClass(_vm.tableready),
+          on: { click: _vm.downloadFailedWords }
+        },
+        [_vm._v("Download Failed Words")]
       )
     ]),
     _vm._v(" "),
@@ -29928,6 +29943,50 @@ class CheckTable {
 
     this.fullDefData = dictsTables
   }
+
+  createFailedWordsDownload () {
+    let table = []
+    let header = ['TargetWord', 'Language', 'MorphClient', 'ShortLexical', 'FullLexical']
+    table.push(header)
+
+    let dictsListShort = this.getDictsList('shortDefData', 'shortDefs')
+    let dictsListFull = this.getDictsList('fullDefData', 'fullDefs')
+
+    this.data.forEach(homonym => {
+      let targetWord = homonym.targetWord
+      let langCode = homonym.languageCode
+      let hasMorphData = homonym.morphClient ? 'yes' : 'no'
+
+      if (!homonym.morphClient) {
+        table.push([targetWord, langCode, hasMorphData])
+      } else {
+        homonym.lexemes.forEach(lexeme => {
+          let lexClientShort = lexeme.shortDefData.lexClient ? 'yes' : 'no'
+
+          let shortDefsResult = []
+          let fullDefsResult = []
+
+          if (lexeme.shortDefData.shortDefs) {
+            dictsListShort.forEach(dict => {
+              let dictValue = []
+              lexeme.shortDefData.shortDefs.forEach(def => {
+                if (def.dict === dict && !def.text) { shortDefsResult.push(dict + ' - no') }
+              })
+              lexeme.fullDefData.fullDefs.forEach(def => {
+                if (def.dict === dict && !def.text) { fullDefsResult.push(dict + ' - no') }
+              })
+            })
+          }
+
+          if (shortDefsResult.length > 0 || fullDefsResult.length > 0) {
+            table.push([targetWord, langCode, hasMorphData, shortDefsResult.join(',\r\n'), fullDefsResult.join(',\r\n')])
+          }
+        })
+      }
+    })
+
+    this.failedWords = table
+  }
 }
 
 
@@ -30068,6 +30127,16 @@ class DataController {
     }
   }
 
+  downloadFailedWords () {
+    if (!this.resultData.failedWords) {
+      this.resultData.createFailedWordsDownload()
+    }
+
+    let dt = new Date()
+    let printDt = dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: ';'}), printDt + ' - failedWords.csv')
+  }
+
   createVueApp () {
     const dataController = this
     this.vueApp = new vue_dist_vue__WEBPACK_IMPORTED_MODULE_3___default.a({
@@ -30091,6 +30160,9 @@ class DataController {
         },
         downloadfulldef () {
           dataController.downloadFullDef()
+        },
+        downloadfailedwords () {
+          dataController.downloadFailedWords()
         },
         getdata (sourceData) {
           dataController.prepareSourceData(sourceData)
@@ -30285,7 +30357,7 @@ class LexicalQuery {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\r\n\t<resultgrid \r\n\t\t:resulttable = \"resulttable\" \r\n\t\t:tableready = \"tableready\"\r\n\t\t@downloadmorph = \"downloadmorph\"\r\n\t\t@downloadshortdef = \"downloadshortdef\"\r\n\t\t@downloadfulldef = \"downloadfulldef\"\r\n\t\t@getdata = \"getdata\"\r\n\t\t@clearresulttable = \"clearresulttable\"\r\n\t></resultgrid>\r\n</div>";
+module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\r\n\t<resultgrid \r\n\t\t:resulttable = \"resulttable\" \r\n\t\t:tableready = \"tableready\"\r\n\t\t@downloadmorph = \"downloadmorph\"\r\n\t\t@downloadshortdef = \"downloadshortdef\"\r\n\t\t@downloadfulldef = \"downloadfulldef\"\r\n\t\t@downloadfailedwords = \"downloadfailedwords\"\r\n\t\t@getdata = \"getdata\"\r\n\t\t@clearresulttable = \"clearresulttable\"\r\n\t></resultgrid>\r\n</div>";
 
 /***/ }),
 

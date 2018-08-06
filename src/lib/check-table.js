@@ -250,4 +250,48 @@ export default class CheckTable {
 
     this.fullDefData = dictsTables
   }
+
+  createFailedWordsDownload () {
+    let table = []
+    let header = ['TargetWord', 'Language', 'MorphClient', 'ShortLexical', 'FullLexical']
+    table.push(header)
+
+    let dictsListShort = this.getDictsList('shortDefData', 'shortDefs')
+    let dictsListFull = this.getDictsList('fullDefData', 'fullDefs')
+
+    this.data.forEach(homonym => {
+      let targetWord = homonym.targetWord
+      let langCode = homonym.languageCode
+      let hasMorphData = homonym.morphClient ? 'yes' : 'no'
+
+      if (!homonym.morphClient) {
+        table.push([targetWord, langCode, hasMorphData])
+      } else {
+        homonym.lexemes.forEach(lexeme => {
+          let lexClientShort = lexeme.shortDefData.lexClient ? 'yes' : 'no'
+
+          let shortDefsResult = []
+          let fullDefsResult = []
+
+          if (lexeme.shortDefData.shortDefs) {
+            dictsListShort.forEach(dict => {
+              let dictValue = []
+              lexeme.shortDefData.shortDefs.forEach(def => {
+                if (def.dict === dict && !def.text) { shortDefsResult.push(dict + ' - no') }
+              })
+              lexeme.fullDefData.fullDefs.forEach(def => {
+                if (def.dict === dict && !def.text) { fullDefsResult.push(dict + ' - no') }
+              })
+            })
+          }
+
+          if (shortDefsResult.length > 0 || fullDefsResult.length > 0) {
+            table.push([targetWord, langCode, hasMorphData, shortDefsResult.join(',\r\n'), fullDefsResult.join(',\r\n')])
+          }
+        })
+      }
+    })
+
+    this.failedWords = table
+  }
 }

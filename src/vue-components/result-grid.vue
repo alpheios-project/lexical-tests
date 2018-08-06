@@ -14,6 +14,7 @@
       <li @click="downloadMorph" :class="disabledClass(tableready)">Download Morph Data</li>
       <li @click="downloadShortDef" :class="disabledClass(tableready)">Download Short Defs</li>
       <li @click="downloadFullDef" :class="disabledClass(tableready)">Download Full Defs</li>
+      <li @click="downloadFailedWords" :class="disabledClass(tableready)">Download Failed Words</li>
     </ul>
     <span v-if="tableready !== null && tableready !== true" class="alpheios-result-grid__loader"></span>
     <table id= "alpheios-result-grid__table">
@@ -176,6 +177,11 @@
       downloadFullDef () {
         if (this.tableready) {
           this.$emit('downloadfulldef')
+        }
+      },
+      downloadFailedWords () {
+        if (this.tableready) {
+          this.$emit('downloadfailedwords')
         }
       },
       checkData () {
