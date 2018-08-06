@@ -29817,7 +29817,7 @@ class CheckTable {
 
     this.data.forEach(homonym => {
       let targetWord = homonym.targetWord
-      let langCode = homonym.languageCode
+      let langCode = homonym.languageName
       let hasMorphData = homonym.morphClient ? 'yes' : 'no'
 
       if (homonym.lexemes) {
@@ -29875,7 +29875,7 @@ class CheckTable {
 
     this.data.forEach(homonym => {
       let targetWord = homonym.targetWord
-      let langCode = homonym.languageCode
+      let langCode = homonym.languageName
 
       if (homonym.lexemes) {
         homonym.lexemes.forEach(lexeme => {
@@ -29946,7 +29946,7 @@ class CheckTable {
 
   createFailedWordsDownload () {
     let table = []
-    let header = ['TargetWord', 'Language', 'MorphClient', 'ShortLexical', 'FullLexical']
+    let header = ['TargetWord', 'Language', 'MorphClient', 'LemmaWord', 'ShortLexical', 'FullLexical']
     table.push(header)
 
     let dictsListShort = this.getDictsList('shortDefData', 'shortDefs')
@@ -29954,15 +29954,13 @@ class CheckTable {
 
     this.data.forEach(homonym => {
       let targetWord = homonym.targetWord
-      let langCode = homonym.languageCode
+      let langCode = homonym.languageName
       let hasMorphData = homonym.morphClient ? 'yes' : 'no'
 
       if (!homonym.morphClient) {
         table.push([targetWord, langCode, hasMorphData])
       } else {
         homonym.lexemes.forEach(lexeme => {
-          let lexClientShort = lexeme.shortDefData.lexClient ? 'yes' : 'no'
-
           let shortDefsResult = []
           let fullDefsResult = []
 
@@ -29979,7 +29977,7 @@ class CheckTable {
           }
 
           if (shortDefsResult.length > 0 || fullDefsResult.length > 0) {
-            table.push([targetWord, langCode, hasMorphData, shortDefsResult.join(',\r\n'), fullDefsResult.join(',\r\n')])
+            table.push([targetWord, langCode, hasMorphData, lexeme.lemmaWord, shortDefsResult.join(',\r\n'), fullDefsResult.join(',\r\n')])
           }
         })
       }
