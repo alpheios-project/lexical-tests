@@ -12067,6 +12067,17 @@ module.exports = Array.isArray || function (arr) {
 
 /***/ }),
 
+/***/ "../node_modules/mini-css-extract-plugin/dist/loader.js!../node_modules/css-loader/index.js?!../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../node_modules/sass-loader/lib/loader.js?!../node_modules/vue-loader/lib/index.js?!./vue-components/checkbox-block.vue?vue&type=style&index=0&lang=scss&":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ../node_modules/mini-css-extract-plugin/dist/loader.js!../node_modules/css-loader??ref--5-1!../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../node_modules/sass-loader/lib/loader.js??ref--5-2!../node_modules/vue-loader/lib??vue-loader-options!./vue-components/checkbox-block.vue?vue&type=style&index=0&lang=scss& ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// extracted by mini-css-extract-plugin
+
+/***/ }),
+
 /***/ "../node_modules/mini-css-extract-plugin/dist/loader.js!../node_modules/css-loader/index.js?!../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../node_modules/sass-loader/lib/loader.js?!../node_modules/vue-loader/lib/index.js?!./vue-components/result-grid.vue?vue&type=style&index=0&lang=scss&":
 /*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ../node_modules/mini-css-extract-plugin/dist/loader.js!../node_modules/css-loader??ref--5-1!../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../node_modules/sass-loader/lib/loader.js??ref--5-2!../node_modules/vue-loader/lib??vue-loader-options!./vue-components/result-grid.vue?vue&type=style&index=0&lang=scss& ***!
@@ -14413,7 +14424,7 @@ util.inherits = __webpack_require__(/*! inherits */ "../node_modules/inherits/in
 /*</replacement>*/
 
 /*<replacement>*/
-var debugUtil = __webpack_require__(/*! util */ 1);
+var debugUtil = __webpack_require__(/*! util */ 2);
 var debug = void 0;
 if (debugUtil && debugUtil.debuglog) {
   debug = debugUtil.debuglog('stream');
@@ -16302,7 +16313,7 @@ Writable.prototype._destroy = function (err, cb) {
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Buffer = __webpack_require__(/*! safe-buffer */ "../node_modules/safe-buffer/index.js").Buffer;
-var util = __webpack_require__(/*! util */ 2);
+var util = __webpack_require__(/*! util */ 3);
 
 function copyBuffer(src, target, offset) {
   src.copy(target, offset);
@@ -17952,10 +17963,10 @@ function hasOwnProperty(obj, prop) {
 
 /***/ }),
 
-/***/ "../node_modules/vue-loader/lib/index.js?!../node_modules/source-map-loader/index.js!./vue-components/result-grid.vue?vue&type=script&lang=js&":
-/*!******************************************************************************************************************************************************!*\
-  !*** ../node_modules/vue-loader/lib??vue-loader-options!../node_modules/source-map-loader!./vue-components/result-grid.vue?vue&type=script&lang=js& ***!
-  \******************************************************************************************************************************************************/
+/***/ "../node_modules/vue-loader/lib/index.js?!../node_modules/source-map-loader/index.js!./vue-components/checkbox-block.vue?vue&type=script&lang=js&":
+/*!*********************************************************************************************************************************************************!*\
+  !*** ../node_modules/vue-loader/lib??vue-loader-options!../node_modules/source-map-loader!./vue-components/checkbox-block.vue?vue&type=script&lang=js& ***!
+  \*********************************************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -17967,6 +17978,52 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'CheckboxBlock',
+  props: {
+    label: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    value: {
+      type: Boolean,
+      required: false,
+      default: false
+    }
+  },
+  data() {
+    return { inputVal: this.value }
+  },
+  watch: {
+    inputVal(val) {
+      this.$emit('input', val)
+    }
+  }
+});
+
+
+/***/ }),
+
+/***/ "../node_modules/vue-loader/lib/index.js?!../node_modules/source-map-loader/index.js!./vue-components/result-grid.vue?vue&type=script&lang=js&":
+/*!******************************************************************************************************************************************************!*\
+  !*** ../node_modules/vue-loader/lib??vue-loader-options!../node_modules/source-map-loader!./vue-components/result-grid.vue?vue&type=script&lang=js& ***!
+  \******************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _vue_components_checkbox_block_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/vue-components/checkbox-block.vue */ "./vue-components/checkbox-block.vue");
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -18049,9 +18106,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 
-  // import axios from 'axios'
+  
+  
+
   /* harmony default export */ __webpack_exports__["default"] = ({
     name: 'ResultGrid',
+    components: {
+      checkboxBlock: _vue_components_checkbox_block_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+    },
     props: {
       resulttable: {
         type: Array,
@@ -18066,12 +18128,22 @@ __webpack_require__.r(__webpack_exports__);
     data () {
       return {
         file: null,
-        sourceData: null
+        sourceData: null,
+        downloadVariants: {
+          morphClient: false,
+          shortLexClient: false,
+          fullLexClient: false,
+          failedMorphClient: false,
+          failedMorphAndLex: false
+        }
       }
     },
     computed: {
       fileSize () {
       	return this.file ? Math.round(this.file.size/1024*100)/100 : null
+      },
+      downloadEnabled () {
+        return this.tableready && Object.keys(this.downloadVariants).some(key => this.downloadVariants[key])
       }
     },
     watch: {
@@ -18083,6 +18155,21 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     methods: {
+      updateMorphClient (val) {
+        this.downloadVariants.morphClient = val
+      },
+      updateShortLexClient (val) {
+        this.downloadVariants.shortLexClient = val
+      },
+      updateFullLexClient (val) {
+        this.downloadVariants.fullLexClient = val
+      },
+      updateFailedMorphClient (val) {
+        this.downloadVariants.failedMorphClient = val
+      },
+      updateFailedMorphAndLex (val) {
+        this.downloadVariants.failedMorphAndLex = val
+      },
       handleFileUpload () {
         this.file = this.$refs.sourcefile.files[0];
       },
@@ -18119,7 +18206,7 @@ __webpack_require__.r(__webpack_exports__);
         }
       },
       disabledClass (value) {
-        return { 'alpheios-result-grid__download_list_disabled' : !value }
+        return { 'alpheios-button_disabled' : !value }
       },
       showAllClick (lexeme) {
         lexeme.fullDefData.showAll = !lexeme.fullDefData.showAll
@@ -18147,6 +18234,31 @@ __webpack_require__.r(__webpack_exports__);
           this.$emit('downloadfailedwords')
         }
       },
+      downloadFailedMorph () {
+        if (this.tableready) {
+          this.$emit('downloadfailedmorph')
+        }
+      },
+
+      downloadSelected () {
+        if (this.tableready) {
+          if (this.downloadVariants.morphClient) {
+            this.downloadMorph()
+          }
+          if (this.downloadVariants.shortLexClient) {
+            this.downloadShortDef()
+          }
+          if (this.downloadVariants.fullLexClient) {
+            this.downloadFullDef()
+          }
+          if (this.downloadVariants.failedMorphClient) {
+            this.downloadFailedMorph()
+          }
+          if (this.downloadVariants.failedMorphAndLex) {
+            this.downloadFailedWords()
+          }
+        }
+      },
       checkData () {
         if (this.sourceData) {
           this.$emit('getdata', this.sourceData)
@@ -18154,6 +18266,69 @@ __webpack_require__.r(__webpack_exports__);
       }
     }
   });
+
+
+/***/ }),
+
+/***/ "../node_modules/vue-loader/lib/loaders/templateLoader.js?!../node_modules/vue-loader/lib/index.js?!./vue-components/checkbox-block.vue?vue&type=template&id=88c5c912&":
+/*!**********************************************************************************************************************************************************************************************************!*\
+  !*** ../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../node_modules/vue-loader/lib??vue-loader-options!./vue-components/checkbox-block.vue?vue&type=template&id=88c5c912& ***!
+  \**********************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("label", { staticClass: "alpheios-checkbox_container" }, [
+    _vm._v(_vm._s(_vm.label) + "\n\t"),
+    _c("input", {
+      directives: [
+        {
+          name: "model",
+          rawName: "v-model",
+          value: _vm.inputVal,
+          expression: "inputVal"
+        }
+      ],
+      attrs: { type: "checkbox" },
+      domProps: {
+        checked: Array.isArray(_vm.inputVal)
+          ? _vm._i(_vm.inputVal, null) > -1
+          : _vm.inputVal
+      },
+      on: {
+        change: function($event) {
+          var $$a = _vm.inputVal,
+            $$el = $event.target,
+            $$c = $$el.checked ? true : false
+          if (Array.isArray($$a)) {
+            var $$v = null,
+              $$i = _vm._i($$a, $$v)
+            if ($$el.checked) {
+              $$i < 0 && (_vm.inputVal = $$a.concat([$$v]))
+            } else {
+              $$i > -1 &&
+                (_vm.inputVal = $$a.slice(0, $$i).concat($$a.slice($$i + 1)))
+            }
+          } else {
+            _vm.inputVal = $$c
+          }
+        }
+      }
+    }),
+    _vm._v(" "),
+    _c("span", { staticClass: "alpheios-checkbox_checkmark" })
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
 
 
 /***/ }),
@@ -18230,41 +18405,85 @@ var render = function() {
       )
     ]),
     _vm._v(" "),
-    _c("ul", { staticClass: "alpheios-result-grid__download_list" }, [
+    _c("ul", { staticClass: "alpheios-result-grid__download_list_variants" }, [
       _c(
         "li",
-        {
-          class: _vm.disabledClass(_vm.tableready),
-          on: { click: _vm.downloadMorph }
-        },
-        [_vm._v("Download Morph Data")]
+        [
+          _c("checkbox-block", {
+            attrs: {
+              label: "Morph Data",
+              value: _vm.downloadVariants.morphClient
+            },
+            on: { input: _vm.updateMorphClient }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "li",
+        [
+          _c("checkbox-block", {
+            attrs: {
+              label: "Short Lex Data",
+              value: _vm.downloadVariants.shortLexClient
+            },
+            on: { input: _vm.updateShortLexClient }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "li",
+        [
+          _c("checkbox-block", {
+            attrs: {
+              label: "Full Lex Data",
+              value: _vm.downloadVariants.fullLexClient
+            },
+            on: { input: _vm.updateFullLexClient }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "li",
+        [
+          _c("checkbox-block", {
+            attrs: {
+              label: "Failed Morph Data",
+              value: _vm.downloadVariants.failedMorphClient
+            },
+            on: { input: _vm.updateFailedMorphClient }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "li",
+        [
+          _c("checkbox-block", {
+            attrs: {
+              label: "Failed Morph and Lex Data",
+              value: _vm.downloadVariants.failedMorphAndLex
+            },
+            on: { input: _vm.updateFailedMorphAndLex }
+          })
+        ],
+        1
       ),
       _vm._v(" "),
       _c(
         "li",
         {
-          class: _vm.disabledClass(_vm.tableready),
-          on: { click: _vm.downloadShortDef }
+          staticClass: "alpheios-result-grid__download_button",
+          class: _vm.disabledClass(_vm.downloadEnabled),
+          on: { click: _vm.downloadSelected }
         },
-        [_vm._v("Download Short Defs")]
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        {
-          class: _vm.disabledClass(_vm.tableready),
-          on: { click: _vm.downloadFullDef }
-        },
-        [_vm._v("Download Full Defs")]
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        {
-          class: _vm.disabledClass(_vm.tableready),
-          on: { click: _vm.downloadFailedWords }
-        },
-        [_vm._v("Download Failed Words")]
+        [_vm._v("Download selected")]
       )
     ]),
     _vm._v(" "),
@@ -29985,6 +30204,24 @@ class CheckTable {
 
     this.failedWords = table
   }
+
+  createFailedMorphDownload () {
+    let table = []
+    let header = ['TargetWord', 'Language', 'MorphClient']
+    table.push(header)
+
+    this.data.forEach(homonym => {
+      let targetWord = homonym.targetWord
+      let langCode = homonym.languageName
+      let hasMorphData = homonym.morphClient ? 'yes' : 'no'
+
+      if (!homonym.morphClient) {
+        table.push([targetWord, langCode, hasMorphData])
+      }
+    })
+
+    this.failedMorph = table
+  }
 }
 
 
@@ -30135,6 +30372,16 @@ class DataController {
     _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: ';'}), printDt + ' - failedWords.csv')
   }
 
+  downloadFailedMorph () {
+    if (!this.resultData.failedMorph) {
+      this.resultData.createFailedMorphDownload()
+    }
+
+    let dt = new Date()
+    let printDt = dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: ';'}), printDt + ' - failedMorph.csv')
+  }
+
   createVueApp () {
     const dataController = this
     this.vueApp = new vue_dist_vue__WEBPACK_IMPORTED_MODULE_3___default.a({
@@ -30161,6 +30408,9 @@ class DataController {
         },
         downloadfailedwords () {
           dataController.downloadFailedWords()
+        },
+        downloadfailedmorph () {
+          dataController.downloadFailedMorph()
         },
         getdata (sourceData) {
           dataController.prepareSourceData(sourceData)
@@ -30355,7 +30605,94 @@ class LexicalQuery {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\r\n\t<resultgrid \r\n\t\t:resulttable = \"resulttable\" \r\n\t\t:tableready = \"tableready\"\r\n\t\t@downloadmorph = \"downloadmorph\"\r\n\t\t@downloadshortdef = \"downloadshortdef\"\r\n\t\t@downloadfulldef = \"downloadfulldef\"\r\n\t\t@downloadfailedwords = \"downloadfailedwords\"\r\n\t\t@getdata = \"getdata\"\r\n\t\t@clearresulttable = \"clearresulttable\"\r\n\t></resultgrid>\r\n</div>";
+module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\r\n\t<resultgrid \r\n\t\t:resulttable = \"resulttable\" \r\n\t\t:tableready = \"tableready\"\r\n\t\t@downloadmorph = \"downloadmorph\"\r\n\t\t@downloadshortdef = \"downloadshortdef\"\r\n\t\t@downloadfulldef = \"downloadfulldef\"\r\n\t\t@downloadfailedmorph = \"downloadfailedmorph\"\r\n\t\t@downloadfailedwords = \"downloadfailedwords\"\r\n\t\t@getdata = \"getdata\"\r\n\t\t@clearresulttable = \"clearresulttable\"\r\n\t></resultgrid>\r\n</div>";
+
+/***/ }),
+
+/***/ "./vue-components/checkbox-block.vue":
+/*!*******************************************!*\
+  !*** ./vue-components/checkbox-block.vue ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _checkbox_block_vue_vue_type_template_id_88c5c912___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./checkbox-block.vue?vue&type=template&id=88c5c912& */ "./vue-components/checkbox-block.vue?vue&type=template&id=88c5c912&");
+/* harmony import */ var _checkbox_block_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./checkbox-block.vue?vue&type=script&lang=js& */ "./vue-components/checkbox-block.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _checkbox_block_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./checkbox-block.vue?vue&type=style&index=0&lang=scss& */ "./vue-components/checkbox-block.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "../node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _checkbox_block_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _checkbox_block_vue_vue_type_template_id_88c5c912___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _checkbox_block_vue_vue_type_template_id_88c5c912___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "vue-components\\checkbox-block.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./vue-components/checkbox-block.vue?vue&type=script&lang=js&":
+/*!********************************************************************!*\
+  !*** ./vue-components/checkbox-block.vue?vue&type=script&lang=js& ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_index_js_vue_loader_options_node_modules_source_map_loader_index_js_checkbox_block_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-loader/lib??vue-loader-options!../../node_modules/source-map-loader!./checkbox-block.vue?vue&type=script&lang=js& */ "../node_modules/vue-loader/lib/index.js?!../node_modules/source-map-loader/index.js!./vue-components/checkbox-block.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_vue_loader_lib_index_js_vue_loader_options_node_modules_source_map_loader_index_js_checkbox_block_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./vue-components/checkbox-block.vue?vue&type=style&index=0&lang=scss&":
+/*!*****************************************************************************!*\
+  !*** ./vue-components/checkbox-block.vue?vue&type=style&index=0&lang=scss& ***!
+  \*****************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_node_modules_css_loader_index_js_ref_5_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_lib_loader_js_ref_5_2_node_modules_vue_loader_lib_index_js_vue_loader_options_checkbox_block_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/mini-css-extract-plugin/dist/loader.js!../../node_modules/css-loader??ref--5-1!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/sass-loader/lib/loader.js??ref--5-2!../../node_modules/vue-loader/lib??vue-loader-options!./checkbox-block.vue?vue&type=style&index=0&lang=scss& */ "../node_modules/mini-css-extract-plugin/dist/loader.js!../node_modules/css-loader/index.js?!../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../node_modules/sass-loader/lib/loader.js?!../node_modules/vue-loader/lib/index.js?!./vue-components/checkbox-block.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_node_modules_css_loader_index_js_ref_5_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_lib_loader_js_ref_5_2_node_modules_vue_loader_lib_index_js_vue_loader_options_checkbox_block_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_mini_css_extract_plugin_dist_loader_js_node_modules_css_loader_index_js_ref_5_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_lib_loader_js_ref_5_2_node_modules_vue_loader_lib_index_js_vue_loader_options_checkbox_block_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_mini_css_extract_plugin_dist_loader_js_node_modules_css_loader_index_js_ref_5_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_lib_loader_js_ref_5_2_node_modules_vue_loader_lib_index_js_vue_loader_options_checkbox_block_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_mini_css_extract_plugin_dist_loader_js_node_modules_css_loader_index_js_ref_5_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_lib_loader_js_ref_5_2_node_modules_vue_loader_lib_index_js_vue_loader_options_checkbox_block_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_mini_css_extract_plugin_dist_loader_js_node_modules_css_loader_index_js_ref_5_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_lib_loader_js_ref_5_2_node_modules_vue_loader_lib_index_js_vue_loader_options_checkbox_block_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./vue-components/checkbox-block.vue?vue&type=template&id=88c5c912&":
+/*!**************************************************************************!*\
+  !*** ./vue-components/checkbox-block.vue?vue&type=template&id=88c5c912& ***!
+  \**************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_checkbox_block_vue_vue_type_template_id_88c5c912___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/vue-loader/lib??vue-loader-options!./checkbox-block.vue?vue&type=template&id=88c5c912& */ "../node_modules/vue-loader/lib/loaders/templateLoader.js?!../node_modules/vue-loader/lib/index.js?!./vue-components/checkbox-block.vue?vue&type=template&id=88c5c912&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_checkbox_block_vue_vue_type_template_id_88c5c912___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_checkbox_block_vue_vue_type_template_id_88c5c912___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
 
 /***/ }),
 
@@ -30446,7 +30783,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ 1:
+/***/ 2:
 /*!**********************!*\
   !*** util (ignored) ***!
   \**********************/
@@ -30457,7 +30794,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ 2:
+/***/ 3:
 /*!**********************!*\
   !*** util (ignored) ***!
   \**********************/

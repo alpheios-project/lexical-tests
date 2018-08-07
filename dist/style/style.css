@@ -1,4 +1,70 @@
 
+.alpheios-checkbox_container {
+  display: block;
+  position: relative;
+  padding-left: 25px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.alpheios-checkbox_container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Create a custom checkbox */
+.alpheios-checkbox_checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: #eee;
+}
+
+/* On mouse-over, add a grey background color */
+.alpheios-checkbox_container:hover input ~ .alpheios-checkbox_checkmark {
+  background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.alpheios-checkbox_container input:checked ~ .alpheios-checkbox_checkmark {
+  background-color: #2196F3;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.alpheios-checkbox_checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.alpheios-checkbox_container input:checked ~ .alpheios-checkbox_checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.alpheios-checkbox_container .alpheios-checkbox_checkmark:after {
+  left: 6px;
+  top: 3px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+
 .alpheios-result-grid__loader {
   border: 8px solid #eaf4fb;
   border-top: 8px solid #3498db;
@@ -76,35 +142,6 @@
   text-transform: lowercase;
   font-weight: bold;
 }
-.alpheios-result-grid__download_list {
-  list-style: none;
-  margin: 10px 0;
-  padding: 0;
-}
-.alpheios-result-grid__download_list li {
-    display: inline-block;
-    cursor: pointer;
-    padding: 8px;
-    background: #db7734;
-    color: #fff;
-    font-weight: bold;
-    border-radius: 5px;
-    margin-right: 10px;
-    vertical-align: middle;
-    -webkit-user-select: none;
-    /* Safari 3.1+ */
-    -moz-user-select: none;
-    /* Firefox 2+ */
-    -ms-user-select: none;
-    /* IE 10+ */
-    user-select: none;
-    /* Standard syntax */
-}
-li.alpheios-result-grid__download_list_disabled,
-button.alpheios-result-grid__download_list_disabled {
-  cursor: default;
-  background: #f0c8ad;
-}
 .alpheios-result-grid__upload_file {
   display: inline-block;
   cursor: pointer;
@@ -137,6 +174,38 @@ button.alpheios-result-grid__download_list_disabled {
   padding: 8px 12px;
   margin: 0 12px;
   vertical-align: middle;
+}
+.alpheios-result-grid__download_button {
+  display: inline-block;
+  cursor: pointer;
+  padding: 8px;
+  background: #db7734;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 5px;
+  margin-right: 10px;
+  vertical-align: middle;
+  -webkit-user-select: none;
+  /* Safari 3.1+ */
+  -moz-user-select: none;
+  /* Firefox 2+ */
+  -ms-user-select: none;
+  /* IE 10+ */
+  user-select: none;
+  /* Standard syntax */
+}
+.alpheios-result-grid__download_list_variants {
+  list-style: none;
+  padding: 0;
+  margin-left: 10px;
+}
+.alpheios-result-grid__download_list_variants li {
+    display: inline-block;
+    margin-right: 10px;
+}
+.alpheios-button_disabled {
+  cursor: default;
+  background: #f0c8ad;
 }
 
 

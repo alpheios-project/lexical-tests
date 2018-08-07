@@ -5,6 +5,7 @@
 		@downloadmorph = "downloadmorph"
 		@downloadshortdef = "downloadshortdef"
 		@downloadfulldef = "downloadfulldef"
+		@downloadfailedmorph = "downloadfailedmorph"
 		@downloadfailedwords = "downloadfailedwords"
 		@getdata = "getdata"
 		@clearresulttable = "clearresulttable"

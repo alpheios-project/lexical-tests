@@ -10,11 +10,13 @@
         <p class="alpheios-result-grid__file_name" v-if="sourceData">Words - {{ sourceData.length }}</p>
         <button v-on:click="checkData()" class="alpheios-result-grid__upload_file" :class="disabledClass(sourceData)">Check data</button>
       </div> 
-    <ul class="alpheios-result-grid__download_list">
-      <li @click="downloadMorph" :class="disabledClass(tableready)">Download Morph Data</li>
-      <li @click="downloadShortDef" :class="disabledClass(tableready)">Download Short Defs</li>
-      <li @click="downloadFullDef" :class="disabledClass(tableready)">Download Full Defs</li>
-      <li @click="downloadFailedWords" :class="disabledClass(tableready)">Download Failed Words</li>
+    <ul class="alpheios-result-grid__download_list_variants">
+      <li><checkbox-block label = 'Morph Data' :value = 'downloadVariants.morphClient' @input = 'updateMorphClient'></checkbox-block></li>
+      <li><checkbox-block label = 'Short Lex Data' :value = 'downloadVariants.shortLexClient' @input = 'updateShortLexClient'></checkbox-block></li>
+      <li><checkbox-block label = 'Full Lex Data' :value = 'downloadVariants.fullLexClient' @input = 'updateFullLexClient'></checkbox-block></li>
+      <li><checkbox-block label = 'Failed Morph Data' :value = 'downloadVariants.failedMorphClient' @input = 'updateFailedMorphClient'></checkbox-block></li>
+      <li><checkbox-block label = 'Failed Morph and Lex Data' :value = 'downloadVariants.failedMorphAndLex' @input = 'updateFailedMorphAndLex'></checkbox-block></li>
+      <li @click = "downloadSelected" :class="disabledClass(downloadEnabled)" class="alpheios-result-grid__download_button">Download selected</li>
     </ul>
     <span v-if="tableready !== null && tableready !== true" class="alpheios-result-grid__loader"></span>
     <table id= "alpheios-result-grid__table">
@@ -86,9 +88,14 @@
   </div>
 </template>
 <script>
-  // import axios from 'axios'
+  
+  import CheckboxBlock from '@/vue-components/checkbox-block.vue'
+
   export default {
     name: 'ResultGrid',
+    components: {
+      checkboxBlock: CheckboxBlock
+    },
     props: {
       resulttable: {
         type: Array,
@@ -103,12 +110,22 @@
     data () {
       return {
         file: null,
-        sourceData: null
+        sourceData: null,
+        downloadVariants: {
+          morphClient: false,
+          shortLexClient: false,
+          fullLexClient: false,
+          failedMorphClient: false,
+          failedMorphAndLex: false
+        }
       }
     },
     computed: {
       fileSize () {
       	return this.file ? Math.round(this.file.size/1024*100)/100 : null
+      },
+      downloadEnabled () {
+        return this.tableready && Object.keys(this.downloadVariants).some(key => this.downloadVariants[key])
       }
     },
     watch: {
@@ -120,6 +137,21 @@
       }
     },
     methods: {
+      updateMorphClient (val) {
+        this.downloadVariants.morphClient = val
+      },
+      updateShortLexClient (val) {
+        this.downloadVariants.shortLexClient = val
+      },
+      updateFullLexClient (val) {
+        this.downloadVariants.fullLexClient = val
+      },
+      updateFailedMorphClient (val) {
+        this.downloadVariants.failedMorphClient = val
+      },
+      updateFailedMorphAndLex (val) {
+        this.downloadVariants.failedMorphAndLex = val
+      },
       handleFileUpload () {
         this.file = this.$refs.sourcefile.files[0];
       },
@@ -156,7 +188,7 @@
         }
       },
       disabledClass (value) {
-        return { 'alpheios-result-grid__download_list_disabled' : !value }
+        return { 'alpheios-button_disabled' : !value }
       },
       showAllClick (lexeme) {
         lexeme.fullDefData.showAll = !lexeme.fullDefData.showAll
@@ -182,6 +214,31 @@
       downloadFailedWords () {
         if (this.tableready) {
           this.$emit('downloadfailedwords')
+        }
+      },
+      downloadFailedMorph () {
+        if (this.tableready) {
+          this.$emit('downloadfailedmorph')
+        }
+      },
+
+      downloadSelected () {
+        if (this.tableready) {
+          if (this.downloadVariants.morphClient) {
+            this.downloadMorph()
+          }
+          if (this.downloadVariants.shortLexClient) {
+            this.downloadShortDef()
+          }
+          if (this.downloadVariants.fullLexClient) {
+            this.downloadFullDef()
+          }
+          if (this.downloadVariants.failedMorphClient) {
+            this.downloadFailedMorph()
+          }
+          if (this.downloadVariants.failedMorphAndLex) {
+            this.downloadFailedWords()
+          }
         }
       },
       checkData () {
@@ -275,35 +332,6 @@
       font-weight: bold;
     }
 
-    .alpheios-result-grid__download_list {
-      list-style: none;
-      margin : 10px 0;
-      padding: 0;
-
-      li {
-        display: inline-block;
-        cursor: pointer;
-        padding: 8px;
-        background: #db7734;
-        color: #fff;
-        font-weight: bold;
-        border-radius: 5px;
-        margin-right: 10px;
-        vertical-align: middle;
-
-        -webkit-user-select: none; /* Safari 3.1+ */
-        -moz-user-select: none; /* Firefox 2+ */
-        -ms-user-select: none; /* IE 10+ */
-        user-select: none; /* Standard syntax */
-      }
-    }
-
-    li.alpheios-result-grid__download_list_disabled,
-    button.alpheios-result-grid__download_list_disabled {
-      cursor: default;
-      background: #f0c8ad;
-    }
-
     .alpheios-result-grid__upload_file {
       display: inline-block;
       cursor: pointer;
@@ -343,5 +371,38 @@
 	  margin: 0 12px;
 	  vertical-align: middle;
 	}
+
+  .alpheios-result-grid__download_button {
+      display: inline-block;
+      cursor: pointer;
+      padding: 8px;
+      background: #db7734;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 5px;
+      margin-right: 10px;
+      vertical-align: middle;
+
+      -webkit-user-select: none; /* Safari 3.1+ */
+      -moz-user-select: none; /* Firefox 2+ */
+      -ms-user-select: none; /* IE 10+ */
+      user-select: none; /* Standard syntax */
+  }
+  .alpheios-result-grid__download_list_variants {
+    list-style: none;
+    padding: 0;
+    margin-left: 10px;
+
+    li {
+      display: inline-block;
+      margin-right: 10px;
+    }
+  }
+
+  .alpheios-button_disabled {
+    cursor: default;
+    background: #f0c8ad;
+  }
+
 
 </style>

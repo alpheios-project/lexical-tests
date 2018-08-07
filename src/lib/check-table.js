@@ -292,4 +292,22 @@ export default class CheckTable {
 
     this.failedWords = table
   }
+
+  createFailedMorphDownload () {
+    let table = []
+    let header = ['TargetWord', 'Language', 'MorphClient']
+    table.push(header)
+
+    this.data.forEach(homonym => {
+      let targetWord = homonym.targetWord
+      let langCode = homonym.languageName
+      let hasMorphData = homonym.morphClient ? 'yes' : 'no'
+
+      if (!homonym.morphClient) {
+        table.push([targetWord, langCode, hasMorphData])
+      }
+    })
+
+    this.failedMorph = table
+  }
 }
