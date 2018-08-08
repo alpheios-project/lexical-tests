@@ -2,6 +2,7 @@
 	<resultgrid 
 		:resulttable = "resulttable" 
 		:tableready = "tableready"
+		:translationlangs = "translationlangs"
 		@downloadmorph = "downloadmorph"
 		@downloadshortdef = "downloadshortdef"
 		@downloadfulldef = "downloadfulldef"

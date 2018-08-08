@@ -11,5 +11,14 @@
       	"as":  { "url": "https://github.com/alpheios-project/as", "name": "Abbott-Smith", "languageCode": "grc" },
 
       	"ls":  { "url": "https://github.com/alpheios-project/ls", "name": "Lewis & Short", "languageCode": "lat" }
+	},
+	"translationlangs": {
+	  "en-US"  : "eng"  ,
+      "it"  : "ita"  ,
+      "pt"  : "por"  ,
+      "ca"  : "cat"  ,
+      "fr"  : "fre"  ,
+      "de"  : "ger"  ,
+      "es"  : "spa"  
 	}
 }

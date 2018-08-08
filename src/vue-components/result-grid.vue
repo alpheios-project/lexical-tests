@@ -12,15 +12,18 @@
       
     </div> 
     
-    <ul class="alpheios-result-grid__list_checkboxes">
+    <ul class="alpheios-result-grid__list_checkboxes" v-if="langs.length > 0">
       <li class="alpheios-result-grid__list_label">Languages for translations:</li>
-      <li><checkbox-block label = 'Eng' :value = 'checkboxes.eng' property="eng" @input = 'updateProperty'></checkbox-block></li>
+<!--       <li><checkbox-block label = 'Eng' :value = 'checkboxes.eng' property="eng" @input = 'updateProperty'></checkbox-block></li>
       <li><checkbox-block label = 'Fre' :value = 'checkboxes.fre' property="fre" @input = 'updateProperty'></checkbox-block></li>
       <li><checkbox-block label = 'Ita' :value = 'checkboxes.ita' property="ita" @input = 'updateProperty'></checkbox-block></li>
       <li><checkbox-block label = 'Por' :value = 'checkboxes.por' property="por" @input = 'updateProperty'></checkbox-block></li>
       <li><checkbox-block label = 'Cat' :value = 'checkboxes.cat' property="cat" @input = 'updateProperty'></checkbox-block></li>
       <li><checkbox-block label = 'Ger' :value = 'checkboxes.ger' property="ger" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Spa' :value = 'checkboxes.spa' property="spa" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Spa' :value = 'checkboxes.spa' property="spa" @input = 'updateProperty'></checkbox-block></li> -->
+      <li v-for="lang in langs">
+        <checkbox-block :label = "lang.property" :value = "checkboxes[lang.property]"" :property="lang.property" @input = 'updateProperty'></checkbox-block>
+      </li>
     </ul>
 
     <p class="alpheios-result-grid__file_block"><button v-on:click="checkData()" class="alpheios-result-grid__upload_file" :class="disabledClass(sourceData)">Check data</button></p>
@@ -30,7 +33,7 @@
       <li><checkbox-block label = 'Full Lex Data' :value = 'checkboxes.fullLexClient' property="fullLexClient" @input = 'updateProperty'></checkbox-block></li>
       <li><checkbox-block label = 'Failed Morph Data' :value = 'checkboxes.failedMorphClient' property="failedMorphClient" @input = 'updateProperty'></checkbox-block></li>
       <li><checkbox-block label = 'Failed Morph and Lex Data' :value = 'checkboxes.failedMorphAndLex' property="failedMorphAndLex" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Translations' :value = 'checkboxes.translationsClient' property="translationsClient" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Translations' :value = 'checkboxes.translationsClient' property="translationsClient" @input = 'updateProperty' v-if="langs.length > 0"></checkbox-block></li>
       
       <li @click = "downloadSelected" :class="disabledClass(downloadEnabled)" class="alpheios-result-grid__download_button">Download selected</li>
     </ul>
@@ -135,6 +138,10 @@
         type: Boolean,
         required: false,
         default: false
+      },
+      translationlangs: {
+        type: Object,
+        required: false
       }
      },
     data () {
@@ -147,25 +154,19 @@
           fullLexClient: false,
           failedMorphClient: false,
           failedMorphAndLex: false,
-          translationsClient: false,
-          eng: false,
-          ita: false,
-          por: false,
-          cat: false,
-          fre: false,
-          ger: false,
-          spa: false
+          translationsClient: false
         },
-        langs: [
-          { code: 'en-US', property: 'eng' },
-          { code: 'it', property: 'ita' },
-          { code: 'pt', property: 'por' },
-          { code: 'ca', property: 'cat' },
-          { code: 'fr', property: 'fre' },
-          { code: 'de', property: 'ger' },
-          { code: 'es', property: 'spa' }
-        ],
+        langs: [],
         uploadError: null
+      }
+    },
+    mounted () {
+      if (Object.keys(this.translationlangs).length > 0) {
+        this.langs = []
+        for (let tLang in this.translationlangs) {
+          this.langs.push( { code: tLang, property: this.translationlangs[tLang] })
+          this.checkboxes[this.translationlangs[tLang]] = false
+        }
       }
     },
     computed: {

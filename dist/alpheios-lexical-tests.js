@@ -20288,6 +20288,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
   
   
@@ -20306,6 +20309,10 @@ __webpack_require__.r(__webpack_exports__);
         type: Boolean,
         required: false,
         default: false
+      },
+      translationlangs: {
+        type: Object,
+        required: false
       }
      },
     data () {
@@ -20318,25 +20325,19 @@ __webpack_require__.r(__webpack_exports__);
           fullLexClient: false,
           failedMorphClient: false,
           failedMorphAndLex: false,
-          translationsClient: false,
-          eng: false,
-          ita: false,
-          por: false,
-          cat: false,
-          fre: false,
-          ger: false,
-          spa: false
+          translationsClient: false
         },
-        langs: [
-          { code: 'en-US', property: 'eng' },
-          { code: 'it', property: 'ita' },
-          { code: 'pt', property: 'por' },
-          { code: 'ca', property: 'cat' },
-          { code: 'fr', property: 'fre' },
-          { code: 'de', property: 'ger' },
-          { code: 'es', property: 'spa' }
-        ],
+        langs: [],
         uploadError: null
+      }
+    },
+    mounted () {
+      if (Object.keys(this.translationlangs).length > 0) {
+        this.langs = []
+        for (let tLang in this.translationlangs) {
+          this.langs.push( { code: tLang, property: this.translationlangs[tLang] })
+          this.checkboxes[this.translationlangs[tLang]] = false
+        }
       }
     },
     computed: {
@@ -20633,88 +20634,35 @@ var render = function() {
         : _vm._e()
     ]),
     _vm._v(" "),
-    _c("ul", { staticClass: "alpheios-result-grid__list_checkboxes" }, [
-      _c("li", { staticClass: "alpheios-result-grid__list_label" }, [
-        _vm._v("Languages for translations:")
-      ]),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: { label: "Eng", value: _vm.checkboxes.eng, property: "eng" },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: { label: "Fre", value: _vm.checkboxes.fre, property: "fre" },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: { label: "Ita", value: _vm.checkboxes.ita, property: "ita" },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: { label: "Por", value: _vm.checkboxes.por, property: "por" },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: { label: "Cat", value: _vm.checkboxes.cat, property: "cat" },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: { label: "Ger", value: _vm.checkboxes.ger, property: "ger" },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: { label: "Spa", value: _vm.checkboxes.spa, property: "spa" },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      )
-    ]),
+    _vm.langs.length > 0
+      ? _c(
+          "ul",
+          { staticClass: "alpheios-result-grid__list_checkboxes" },
+          [
+            _c("li", { staticClass: "alpheios-result-grid__list_label" }, [
+              _vm._v("Languages for translations:")
+            ]),
+            _vm._v(" "),
+            _vm._l(_vm.langs, function(lang) {
+              return _c(
+                "li",
+                [
+                  _c("checkbox-block", {
+                    attrs: {
+                      label: lang.property,
+                      value: _vm.checkboxes[lang.property],
+                      property: lang.property
+                    },
+                    on: { input: _vm.updateProperty }
+                  })
+                ],
+                1
+              )
+            })
+          ],
+          2
+        )
+      : _vm._e(),
     _vm._v(" "),
     _c("p", { staticClass: "alpheios-result-grid__file_block" }, [
       _c(
@@ -20811,14 +20759,16 @@ var render = function() {
       _c(
         "li",
         [
-          _c("checkbox-block", {
-            attrs: {
-              label: "Translations",
-              value: _vm.checkboxes.translationsClient,
-              property: "translationsClient"
-            },
-            on: { input: _vm.updateProperty }
-          })
+          _vm.langs.length > 0
+            ? _c("checkbox-block", {
+                attrs: {
+                  label: "Translations",
+                  value: _vm.checkboxes.translationsClient,
+                  property: "translationsClient"
+                },
+                on: { input: _vm.updateProperty }
+              })
+            : _vm._e()
         ],
         1
       ),
@@ -20915,7 +20865,7 @@ var render = function() {
                           _vm._v(
                             " - " +
                               _vm._s(value ? value : "no data") +
-                              "\n                  "
+                              "\n                    "
                           )
                         ])
                       })
@@ -21094,7 +21044,7 @@ var render = function() {
                                 _vm._v(
                                   " - " +
                                     _vm._s(trans.glosses.join("; ")) +
-                                    "\n                  "
+                                    "\n                    "
                                 )
                               ])
                             : _vm._e(),
@@ -21102,7 +21052,7 @@ var render = function() {
                           !trans.glosses
                             ? _c("span", { class: _vm.emptyClass(false) }, [
                                 _c("b", [_vm._v(_vm._s(trans.languageCode))]),
-                                _vm._v(" - no\n                  ")
+                                _vm._v(" - no\n                    ")
                               ])
                             : _vm._e()
                         ])
@@ -32724,6 +32674,7 @@ class DataController {
 
         this.languages = this.prepareLanguagesConfig(config.languages)
         this.dictionaries = config.dictionaries
+        this.translationlangs = config.translationlangs
       } catch (err) {
         console.error('Some problems with loading config data', err.message)
       }
@@ -32847,7 +32798,8 @@ class DataController {
       data () {
         return {
           resulttable: [],
-          tableready: null
+          tableready: null,
+          translationlangs: dataController.translationlangs
         }
       },
       methods: {
@@ -33084,7 +33036,7 @@ class LexicalQuery {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\r\n\t<resultgrid \r\n\t\t:resulttable = \"resulttable\" \r\n\t\t:tableready = \"tableready\"\r\n\t\t@downloadmorph = \"downloadmorph\"\r\n\t\t@downloadshortdef = \"downloadshortdef\"\r\n\t\t@downloadfulldef = \"downloadfulldef\"\r\n\t\t@downloadfailedmorph = \"downloadfailedmorph\"\r\n\t\t@downloadfailedwords = \"downloadfailedwords\"\r\n\t\t@downloadtranslationsclient = \"downloadtranslationsclient\"\r\n\t\t@getdata = \"getdata\"\r\n\t\t@clearresulttable = \"clearresulttable\"\r\n\t></resultgrid>\r\n</div>";
+module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\r\n\t<resultgrid \r\n\t\t:resulttable = \"resulttable\" \r\n\t\t:tableready = \"tableready\"\r\n\t\t:translationlangs = \"translationlangs\"\r\n\t\t@downloadmorph = \"downloadmorph\"\r\n\t\t@downloadshortdef = \"downloadshortdef\"\r\n\t\t@downloadfulldef = \"downloadfulldef\"\r\n\t\t@downloadfailedmorph = \"downloadfailedmorph\"\r\n\t\t@downloadfailedwords = \"downloadfailedwords\"\r\n\t\t@downloadtranslationsclient = \"downloadtranslationsclient\"\r\n\t\t@getdata = \"getdata\"\r\n\t\t@clearresulttable = \"clearresulttable\"\r\n\t></resultgrid>\r\n</div>";
 
 /***/ }),
 

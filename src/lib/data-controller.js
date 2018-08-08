@@ -32,6 +32,7 @@ export default class DataController {
 
         this.languages = this.prepareLanguagesConfig(config.languages)
         this.dictionaries = config.dictionaries
+        this.translationlangs = config.translationlangs
       } catch (err) {
         console.error('Some problems with loading config data', err.message)
       }
@@ -155,7 +156,8 @@ export default class DataController {
       data () {
         return {
           resulttable: [],
-          tableready: null
+          tableready: null,
+          translationlangs: dataController.translationlangs
         }
       },
       methods: {
