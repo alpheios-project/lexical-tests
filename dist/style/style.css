@@ -219,6 +219,11 @@ li.alpheios-result-grid__list_label {
   display: block;
   margin-bottom: 10px;
 }
+.alpheios-result__error {
+  color: #dd0000;
+  font-weight: bold;
+  margin-left: 10px;
+}
 
 
 /*# sourceMappingURL=style.css.map*/

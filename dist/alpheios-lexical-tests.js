@@ -20285,6 +20285,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
   
   
@@ -20332,7 +20335,8 @@ __webpack_require__.r(__webpack_exports__);
           { code: 'fr', property: 'fre' },
           { code: 'de', property: 'ger' },
           { code: 'es', property: 'spa' }
-        ]
+        ],
+        uploadError: null
       }
     },
     computed: {
@@ -20348,6 +20352,7 @@ __webpack_require__.r(__webpack_exports__);
     watch: {
       file () {
       	this.sourceData = null
+        this.uploadError = null
       	if (this.resulttable) {
       	  this.$emit('clearresulttable')
       	}
@@ -20363,23 +20368,53 @@ __webpack_require__.r(__webpack_exports__);
       
       async uploadFile () {
       	let vm = this
+        this.uploadError = null
       	if (this.file) {
-	      let reader = new FileReader()
-	      reader.onload = function(event) {
-	        let dataUri = event.target.result
-	        try {
-	          vm.sourceData = JSON.parse(dataUri)
-	        } catch (err) {
-	          console.error('***************some problems with converting the file', err.message)
+	        let reader = new FileReader()
+	        reader.onload = function(event) {
+	          let dataUri = event.target.result
+	          try {
+	            vm.sourceData = JSON.parse(dataUri)
+              vm.checkSourceData()
+	          } catch (err) {
+	            console.error('***************some problems with converting the file', err.message)
+              vm.uploadError = 'Some problems with converting the file - ' + err.message + '.'
+	          }
 	        }
-	      }
 	     
-	      reader.onerror = function(event) {
-	        console.error("Fail " + event.target.error.message);
-	      }
+	        reader.onerror = function(event) {
+	          console.error("Fail " + event.target.error.message);
+	        }
 	     
-	      reader.readAsText(this.file)
-	    }
+	        reader.readAsText(this.file)
+	      }
+      },
+
+      checkSourceData () {
+        if (!Array.isArray(this.sourceData)) {
+          this.uploadError = 'File should contain an array of words, you should reload data.'
+          this.sourceData = null
+          return
+        }
+        if (this.sourceData.some(word => !word.targetWord)) {
+          this.uploadError = 'Each word block in the file should contain targetWord property, you should reload data.'
+          this.sourceData = null
+          return
+        }
+        if (this.sourceData.some(word => !word.languageCode)) {
+          this.uploadError = 'Each word block in the file should contain languageCode property, you should reload data.'
+          this.sourceData = null
+          return
+        }
+
+        this.sourceData.forEach(word => {
+          if (!word.lexiconShortOpts || !word.lexiconShortOpts.codes) {
+            word.lexiconShortOpts = { codes: [] }
+          }
+          if (!word.lexiconFullOpts || !word.lexiconFullOpts.codes) {
+            word.lexiconFullOpts = { codes: [] }
+          }
+        })
       },
 
       boolenToStr (bool) {
@@ -20550,6 +20585,12 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { attrs: { id: "alpheios-result-grid" } }, [
+    _vm.uploadError
+      ? _c("p", { staticClass: "alpheios-result__error" }, [
+          _vm._v(_vm._s(_vm.uploadError))
+        ])
+      : _vm._e(),
+    _vm._v(" "),
     _c("div", { staticClass: "alpheios-result-grid__file_block" }, [
       _c("label", [
         _c("input", {
@@ -32384,8 +32425,6 @@ class CheckTable {
         }
       }
     })
-
-    console.info('*****************getLemmaTranslations', homonymData)
   }
 
   getFeaturesList () {
@@ -32674,7 +32713,7 @@ class DataController {
 
   async initVue () {
     await this.loadConfigData()
-    await this.loadSourceData()
+    // await this.loadSourceData()
     this.createVueApp()
   }
 

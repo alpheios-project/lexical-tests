@@ -1,5 +1,6 @@
 <template>
   <div id="alpheios-result-grid">
+    <p v-if="uploadError" class="alpheios-result__error">{{ uploadError }}</p>
     <div class="alpheios-result-grid__file_block">
       <label>
         <input type="file" id="alpheios-result-grid__file" ref="sourcefile" v-on:change="handleFileUpload()"/>
@@ -8,7 +9,9 @@
       <p class="alpheios-result-grid__file_name" v-if="file">{{ file.name }}, {{ fileSize }}Kb</p>
       <button v-on:click="uploadFile()" class="alpheios-result-grid__upload_file" :class="disabledClass(file)">Upload data</button>
       <p class="alpheios-result-grid__file_name" v-if="sourceData">Words - {{ sourceData.length }}</p>
+      
     </div> 
+    
     <ul class="alpheios-result-grid__list_checkboxes">
       <li class="alpheios-result-grid__list_label">Languages for translations:</li>
       <li><checkbox-block label = 'Eng' :value = 'checkboxes.eng' property="eng" @input = 'updateProperty'></checkbox-block></li>
@@ -161,7 +164,8 @@
           { code: 'fr', property: 'fre' },
           { code: 'de', property: 'ger' },
           { code: 'es', property: 'spa' }
-        ]
+        ],
+        uploadError: null
       }
     },
     computed: {
@@ -177,6 +181,7 @@
     watch: {
       file () {
       	this.sourceData = null
+        this.uploadError = null
       	if (this.resulttable) {
       	  this.$emit('clearresulttable')
       	}
@@ -192,23 +197,53 @@
       
       async uploadFile () {
       	let vm = this
+        this.uploadError = null
       	if (this.file) {
-	      let reader = new FileReader()
-	      reader.onload = function(event) {
-	        let dataUri = event.target.result
-	        try {
-	          vm.sourceData = JSON.parse(dataUri)
-	        } catch (err) {
-	          console.error('***************some problems with converting the file', err.message)
+	        let reader = new FileReader()
+	        reader.onload = function(event) {
+	          let dataUri = event.target.result
+	          try {
+	            vm.sourceData = JSON.parse(dataUri)
+              vm.checkSourceData()
+	          } catch (err) {
+	            console.error('***************some problems with converting the file', err.message)
+              vm.uploadError = 'Some problems with converting the file - ' + err.message + '.'
+	          }
 	        }
-	      }
 	     
-	      reader.onerror = function(event) {
-	        console.error("Fail " + event.target.error.message);
-	      }
+	        reader.onerror = function(event) {
+	          console.error("Fail " + event.target.error.message);
+	        }
 	     
-	      reader.readAsText(this.file)
-	    }
+	        reader.readAsText(this.file)
+	      }
+      },
+
+      checkSourceData () {
+        if (!Array.isArray(this.sourceData)) {
+          this.uploadError = 'File should contain an array of words, you should reload data.'
+          this.sourceData = null
+          return
+        }
+        if (this.sourceData.some(word => !word.targetWord)) {
+          this.uploadError = 'Each word block in the file should contain targetWord property, you should reload data.'
+          this.sourceData = null
+          return
+        }
+        if (this.sourceData.some(word => !word.languageCode)) {
+          this.uploadError = 'Each word block in the file should contain languageCode property, you should reload data.'
+          this.sourceData = null
+          return
+        }
+
+        this.sourceData.forEach(word => {
+          if (!word.lexiconShortOpts || !word.lexiconShortOpts.codes) {
+            word.lexiconShortOpts = { codes: [] }
+          }
+          if (!word.lexiconFullOpts || !word.lexiconFullOpts.codes) {
+            word.lexiconFullOpts = { codes: [] }
+          }
+        })
       },
 
       boolenToStr (bool) {
@@ -463,4 +498,9 @@
     margin-bottom: 10px;
   }
 
+  .alpheios-result__error {
+    color: #dd0000;
+    font-weight: bold;
+    margin-left: 10px;
+  }
 </style>

@@ -21,7 +21,7 @@ export default class DataController {
 
   async initVue () {
     await this.loadConfigData()
-    await this.loadSourceData()
+    // await this.loadSourceData()
     this.createVueApp()
   }
 

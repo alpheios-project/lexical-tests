@@ -123,8 +123,6 @@ export default class CheckTable {
         }
       }
     })
-
-    console.info('*****************getLemmaTranslations', homonymData)
   }
 
   getFeaturesList () {
