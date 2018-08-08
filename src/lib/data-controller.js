@@ -134,6 +134,16 @@ export default class DataController {
     FileController.saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: ';'}), printDt + ' - failedMorph.csv')
   }
 
+  downloadTranslationsClient () {
+    if (!this.resultData.translationsData) {
+      this.resultData.createTranslationsDataDownload()
+    }
+
+    let dt = new Date()
+    let printDt = dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-')
+    FileController.saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: ';'}), printDt + ' - translationsData.csv')
+  }
+
   createVueApp () {
     const dataController = this
     this.vueApp = new Vue({
@@ -164,9 +174,12 @@ export default class DataController {
         downloadfailedmorph () {
           dataController.downloadFailedMorph()
         },
-        getdata (sourceData) {
+        downloadtranslationsclient () {
+          dataController.downloadTranslationsClient()
+        },
+        getdata (sourceData, langs) {
           dataController.prepareSourceData(sourceData)
-          dataController.resultData.getData(dataController)
+          dataController.resultData.getData(dataController, langs)
         },
         clearresulttable () {
           dataController.resultData.clear(dataController)

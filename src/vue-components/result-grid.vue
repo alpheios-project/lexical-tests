@@ -1,21 +1,34 @@
 <template>
   <div id="alpheios-result-grid">
     <div class="alpheios-result-grid__file_block">
-        <label>
-          <input type="file" id="alpheios-result-grid__file" ref="sourcefile" v-on:change="handleFileUpload()"/>
-          <span>Choose file</span>
-        </label>
-        <p class="alpheios-result-grid__file_name" v-if="file">{{ file.name }}, {{ fileSize }}Kb</p>
-        <button v-on:click="uploadFile()" class="alpheios-result-grid__upload_file" :class="disabledClass(file)">Upload data</button>
-        <p class="alpheios-result-grid__file_name" v-if="sourceData">Words - {{ sourceData.length }}</p>
-        <button v-on:click="checkData()" class="alpheios-result-grid__upload_file" :class="disabledClass(sourceData)">Check data</button>
-      </div> 
-    <ul class="alpheios-result-grid__download_list_variants">
-      <li><checkbox-block label = 'Morph Data' :value = 'downloadVariants.morphClient' @input = 'updateMorphClient'></checkbox-block></li>
-      <li><checkbox-block label = 'Short Lex Data' :value = 'downloadVariants.shortLexClient' @input = 'updateShortLexClient'></checkbox-block></li>
-      <li><checkbox-block label = 'Full Lex Data' :value = 'downloadVariants.fullLexClient' @input = 'updateFullLexClient'></checkbox-block></li>
-      <li><checkbox-block label = 'Failed Morph Data' :value = 'downloadVariants.failedMorphClient' @input = 'updateFailedMorphClient'></checkbox-block></li>
-      <li><checkbox-block label = 'Failed Morph and Lex Data' :value = 'downloadVariants.failedMorphAndLex' @input = 'updateFailedMorphAndLex'></checkbox-block></li>
+      <label>
+        <input type="file" id="alpheios-result-grid__file" ref="sourcefile" v-on:change="handleFileUpload()"/>
+        <span>Choose file</span>
+      </label>
+      <p class="alpheios-result-grid__file_name" v-if="file">{{ file.name }}, {{ fileSize }}Kb</p>
+      <button v-on:click="uploadFile()" class="alpheios-result-grid__upload_file" :class="disabledClass(file)">Upload data</button>
+      <p class="alpheios-result-grid__file_name" v-if="sourceData">Words - {{ sourceData.length }}</p>
+    </div> 
+    <ul class="alpheios-result-grid__list_checkboxes">
+      <li class="alpheios-result-grid__list_label">Languages for translations:</li>
+      <li><checkbox-block label = 'Eng' :value = 'checkboxes.eng' property="eng" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Fre' :value = 'checkboxes.fre' property="fre" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Ita' :value = 'checkboxes.ita' property="ita" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Por' :value = 'checkboxes.por' property="por" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Cat' :value = 'checkboxes.cat' property="cat" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Ger' :value = 'checkboxes.ger' property="ger" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Spa' :value = 'checkboxes.spa' property="spa" @input = 'updateProperty'></checkbox-block></li>
+    </ul>
+
+    <p class="alpheios-result-grid__file_block"><button v-on:click="checkData()" class="alpheios-result-grid__upload_file" :class="disabledClass(sourceData)">Check data</button></p>
+    <ul class="alpheios-result-grid__list_checkboxes">
+      <li><checkbox-block label = 'Morph Data' :value = 'checkboxes.morphClient' property="morphClient" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Short Lex Data' :value = 'checkboxes.shortLexClient' property="shortLexClient" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Full Lex Data' :value = 'checkboxes.fullLexClient' property="fullLexClient" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Failed Morph Data' :value = 'checkboxes.failedMorphClient' property="failedMorphClient" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Failed Morph and Lex Data' :value = 'checkboxes.failedMorphAndLex' property="failedMorphAndLex" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = 'Translations' :value = 'checkboxes.translationsClient' property="translationsClient" @input = 'updateProperty'></checkbox-block></li>
+      
       <li @click = "downloadSelected" :class="disabledClass(downloadEnabled)" class="alpheios-result-grid__download_button">Download selected</li>
     </ul>
     <span v-if="tableready !== null && tableready !== true" class="alpheios-result-grid__loader"></span>
@@ -27,6 +40,7 @@
               <th>Morph definitions</th>
               <th>Short def data</th>
               <th>Full def data</th>
+              <th>Translations</th>
             </tr>
           </thead>
           <tbody v-for="homonym in resulttable">
@@ -37,6 +51,7 @@
               </td>
               <td>{{ homonym.lexiconShortOpts.dicts.join('; ') }}</td>
               <td>{{ homonym.lexiconFullOpts.dicts.join('; ') }}</td>
+              <td>{{ homonym.langs ? homonym.langs.map(lang => lang.property).join('; ') : '' }}</td>
             </tr>
 
             <tr v-for="(lexeme, index) in homonym.lexemes">
@@ -81,8 +96,20 @@
                   </div>
                 </div>
               </td>
+              <td>
+                <ul>
+                  <li v-for="trans in lexeme.translations">
+                    <span v-if="trans.glosses">
+                      <b>{{ trans.languageCode }}</b> - {{ trans.glosses.join('; ') }}
+                    </span>
+                    <span v-if="!trans.glosses" :class="emptyClass(false)">
+                      <b>{{ trans.languageCode }}</b> - no
+                    </span>
+                  </li>
+                </ul>
+              </td>
              </tr>
-             <tr><td colspan="5" class="alpheios-tests-results__grid__divider"></td></tr>
+             <tr><td colspan="6" class="alpheios-tests-results__grid__divider"></td></tr>
           </tbody>
     </table>
   </div>
@@ -111,13 +138,30 @@
       return {
         file: null,
         sourceData: null,
-        downloadVariants: {
+        checkboxes: {
           morphClient: false,
           shortLexClient: false,
           fullLexClient: false,
           failedMorphClient: false,
-          failedMorphAndLex: false
-        }
+          failedMorphAndLex: false,
+          translationsClient: false,
+          eng: false,
+          ita: false,
+          por: false,
+          cat: false,
+          fre: false,
+          ger: false,
+          spa: false
+        },
+        langs: [
+          { code: 'en-US', property: 'eng' },
+          { code: 'it', property: 'ita' },
+          { code: 'pt', property: 'por' },
+          { code: 'ca', property: 'cat' },
+          { code: 'fr', property: 'fre' },
+          { code: 'de', property: 'ger' },
+          { code: 'es', property: 'spa' }
+        ]
       }
     },
     computed: {
@@ -125,7 +169,9 @@
       	return this.file ? Math.round(this.file.size/1024*100)/100 : null
       },
       downloadEnabled () {
-        return this.tableready && Object.keys(this.downloadVariants).some(key => this.downloadVariants[key])
+        let downloads = Object.keys(this.checkboxes).filter(key => this.checkboxes[key] && !this.langs.map(lang => lang.property).includes(key))
+
+        return this.tableready && (downloads.length > 0)
       }
     },
     watch: {
@@ -137,20 +183,8 @@
       }
     },
     methods: {
-      updateMorphClient (val) {
-        this.downloadVariants.morphClient = val
-      },
-      updateShortLexClient (val) {
-        this.downloadVariants.shortLexClient = val
-      },
-      updateFullLexClient (val) {
-        this.downloadVariants.fullLexClient = val
-      },
-      updateFailedMorphClient (val) {
-        this.downloadVariants.failedMorphClient = val
-      },
-      updateFailedMorphAndLex (val) {
-        this.downloadVariants.failedMorphAndLex = val
+      updateProperty (val, property) {
+        this.checkboxes[property] = val
       },
       handleFileUpload () {
         this.file = this.$refs.sourcefile.files[0];
@@ -221,29 +255,40 @@
           this.$emit('downloadfailedmorph')
         }
       },
-
+      downloadTranslationsClient () {
+        if (this.tableready) {
+          this.$emit('downloadtranslationsclient')
+        }
+      },
       downloadSelected () {
         if (this.tableready) {
-          if (this.downloadVariants.morphClient) {
+          if (this.checkboxes.morphClient) {
             this.downloadMorph()
           }
-          if (this.downloadVariants.shortLexClient) {
+          if (this.checkboxes.shortLexClient) {
             this.downloadShortDef()
           }
-          if (this.downloadVariants.fullLexClient) {
+          if (this.checkboxes.fullLexClient) {
             this.downloadFullDef()
           }
-          if (this.downloadVariants.failedMorphClient) {
+          if (this.checkboxes.failedMorphClient) {
             this.downloadFailedMorph()
           }
-          if (this.downloadVariants.failedMorphAndLex) {
+          if (this.checkboxes.failedMorphAndLex) {
             this.downloadFailedWords()
           }
+          if (this.checkboxes.translationsClient) {
+            this.downloadTranslationsClient()
+          }
+          
         }
       },
       checkData () {
         if (this.sourceData) {
-          this.$emit('getdata', this.sourceData)
+          let langsProps = Object.keys(this.checkboxes).filter(key => this.checkboxes[key] && this.langs.map(lang => lang.property).includes(key))
+
+          let langs = this.langs.filter(lang => langsProps.includes(lang.property))
+          this.$emit('getdata', this.sourceData, langs)
         }
       }
     }
@@ -349,6 +394,9 @@
     }
 
 	.alpheios-result-grid__file_block {
+    margin: 0 10px;
+    display: inline-block;
+    vertical-align: middle;
 	  label {
 		display: inline-block;
 		background: #3498db;
@@ -388,11 +436,13 @@
       -ms-user-select: none; /* IE 10+ */
       user-select: none; /* Standard syntax */
   }
-  .alpheios-result-grid__download_list_variants {
+  .alpheios-result-grid__list_checkboxes {
     list-style: none;
-    padding: 0;
-    margin-left: 10px;
-
+    display: inline-block;
+    margin: 10px;
+    border: 1px solid;
+    padding: 10px;
+    vertical-align: middle;
     li {
       display: inline-block;
       margin-right: 10px;
@@ -404,5 +454,10 @@
     background: #f0c8ad;
   }
 
+  li.alpheios-result-grid__list_label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 10px;
+  }
 
 </style>

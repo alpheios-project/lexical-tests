@@ -17,6 +17,11 @@
         type: Boolean,
         required: false,
         default: false
+      },
+      property: {
+        type: String,
+        required: false,
+        default: ''
       }
     },
     data() {
@@ -24,7 +29,7 @@
     },
     watch: {
       inputVal(val) {
-        this.$emit('input', val)
+        this.$emit('input', val, this.property)
       }
     }
   }
@@ -34,7 +39,6 @@
   display: block;
   position: relative;
   padding-left: 25px;
-  margin-bottom: 12px;
   cursor: pointer;
   font-size: 16px;
   -webkit-user-select: none;

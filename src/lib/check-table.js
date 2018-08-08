@@ -14,12 +14,16 @@ export default class CheckTable {
     this.morphData = null
     this.shortDefData = null
     this.fullDefData = null
+    this.failedWords = null
+    this.failedMorph = null
+    this.translationsData = null
     Vue.set(dataController.vueApp, 'resulttable', this.data)
     Vue.set(dataController.vueApp, 'tableready', null)
   }
 
-  async getData (dataController) {
+  async getData (dataController, langs = []) {
     Vue.set(dataController.vueApp, 'tableready', false)
+
     let sourceData = dataController.sourceData
     for (let i = 0; i < sourceData.length; i++) {
       let sourceItem = sourceData[i]
@@ -33,6 +37,10 @@ export default class CheckTable {
 
         await this.getShortDefsData(lexQuery, homonymData)
         await this.getFullDefsData(lexQuery, homonymData)
+
+        if (langs.length > 0) {
+          await this.getLemmaTranslations(lexQuery, homonymData, langs)
+        }
       }
 
       Vue.set(dataController.vueApp, 'resulttable', this.data)
@@ -97,6 +105,26 @@ export default class CheckTable {
         homonymData.lexemes[index].fullDefData.fullDefs = lexeme.meaning.fullDefs.map(def => { return { text: def.text, code: def.code, dict: def.dict } })
       }
     })
+  }
+
+  async getLemmaTranslations (lexQuery, homonymData, langs) {
+    homonymData.langs = langs
+    await lexQuery.getLemmaTranslations(langs)
+
+    lexQuery.homonym.lexemes.forEach((lexeme, index) => {
+      homonymData.lexemes[index].translations = {}
+      for (let lang of langs) {
+        let curTrans = lexeme.lemma.translations.filter(trans => trans.languageCode === lang.property)
+
+        if (curTrans.length === 0) {
+          homonymData.lexemes[index].translations[lang.property] = { languageCode: lang.property }
+        } else {
+          homonymData.lexemes[index].translations[lang.property] = curTrans[0]
+        }
+      }
+    })
+
+    console.info('*****************getLemmaTranslations', homonymData)
   }
 
   getFeaturesList () {
@@ -309,5 +337,33 @@ export default class CheckTable {
     })
 
     this.failedMorph = table
+  }
+
+  createTranslationsDataDownload () {
+    let langs = this.data[0].langs.map(lang => lang.property)
+
+    let table = []
+    let header = ['TargetWord', 'Language', 'Lemma', ...langs]
+
+    table.push(header)
+
+    this.data.forEach(homonym => {
+      let targetWord = homonym.targetWord
+      let langCode = homonym.languageName
+
+      if (homonym.lexemes) {
+        homonym.lexemes.forEach(lexeme => {
+          let langsData = []
+          let lemma = lexeme.lemmaWord
+          for (let lang of langs) {
+            if (lexeme.translations[lang].glosses) {
+              langsData.push(lexeme.translations[lang].glosses.join('; '))
+            }
+          }
+          table.push([targetWord, langCode, lemma, ...langsData])
+        })
+      }
+    })
+    this.translationsData = table
   }
 }
