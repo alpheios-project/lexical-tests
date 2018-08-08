@@ -284,6 +284,9 @@
         }
       },
       checkData () {
+        if (this.resulttable) {
+          this.$emit('clearresulttable')
+        }
         if (this.sourceData) {
           let langsProps = Object.keys(this.checkboxes).filter(key => this.checkboxes[key] && this.langs.map(lang => lang.property).includes(key))
 
