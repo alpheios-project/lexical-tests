@@ -32724,14 +32724,18 @@ class DataController {
     defOpts.dicts = defOpts.codes.map(code => `${code} (${this.dictionaries[code].name})`)
   }
 
+  static getPrintData () {
+    let dt = new Date()
+    return dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-').replace(' ', '')
+  }
+
   downloadMorph () {
     if (!this.resultData.morphData) {
       this.resultData.createMorphDataDownload()
     }
 
-    let dt = new Date()
-    let printDt = dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-')
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: ';'}), printDt + ' - morphData.csv')
+    let printDt = DataController.getPrintData()
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: ';'}), printDt + '-morphData.csv')
   }
 
   downloadShortDef () {
@@ -32739,9 +32743,8 @@ class DataController {
       this.resultData.createShortDefDownload()
     }
 
-    let dt = new Date()
-    let printDt = dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-')
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.shortDefData, {delimiter: ';'}), printDt + ' - shortDefData.csv')
+    let printDt = DataController.getPrintData()
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.shortDefData, {delimiter: ';'}), printDt + '-shortDefData.csv')
   }
 
   downloadFullDef () {
@@ -32749,8 +32752,7 @@ class DataController {
       this.resultData.createFullDefDownload()
     }
 
-    let dt = new Date()
-    let printDt = dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-')
+    let printDt = DataController.getPrintData()
 
     for (let tbl in this.resultData.fullDefData) {
       _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(this.resultData.fullDefData[tbl], `${printDt}-fullDefData-${tbl}.html`, 'text/html')
@@ -32762,9 +32764,8 @@ class DataController {
       this.resultData.createFailedWordsDownload()
     }
 
-    let dt = new Date()
-    let printDt = dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-')
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: ';'}), printDt + ' - failedWords.csv')
+    let printDt = DataController.getPrintData()
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: ';'}), printDt + '-failedWords.csv')
   }
 
   downloadFailedMorph () {
@@ -32772,9 +32773,8 @@ class DataController {
       this.resultData.createFailedMorphDownload()
     }
 
-    let dt = new Date()
-    let printDt = dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-')
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: ';'}), printDt + ' - failedMorph.csv')
+    let printDt = DataController.getPrintData()
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: ';'}), printDt + '-failedMorph.csv')
   }
 
   downloadTranslationsClient () {
@@ -32782,9 +32782,8 @@ class DataController {
       this.resultData.createTranslationsDataDownload()
     }
 
-    let dt = new Date()
-    let printDt = dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-')
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: ';'}), printDt + ' - translationsData.csv')
+    let printDt = DataController.getPrintData()
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: ';'}), printDt + '-translationsData.csv')
   }
 
   createVueApp () {
