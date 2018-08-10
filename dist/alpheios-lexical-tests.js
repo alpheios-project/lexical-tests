@@ -5939,8 +5939,8 @@ module.exports = g;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _config_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./config.json */ "./alpheios/config.json");
-var _config_json__WEBPACK_IMPORTED_MODULE_0___namespace = /*#__PURE__*/__webpack_require__.t(/*! ./config.json */ "./alpheios/config.json", 1);
+/* harmony import */ var _atsconfig_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./atsconfig.json */ "./alpheios/atsconfig.json");
+var _atsconfig_json__WEBPACK_IMPORTED_MODULE_0___namespace = /*#__PURE__*/__webpack_require__.t(/*! ./atsconfig.json */ "./alpheios/atsconfig.json", 1);
 /* harmony import */ var promise_polyfill__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! promise-polyfill */ "../node_modules/promise-polyfill/lib/index.js");
 /* harmony import */ var promise_polyfill__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(promise_polyfill__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var whatwg_fetch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! whatwg-fetch */ "../node_modules/whatwg-fetch/fetch.js");
@@ -5958,10 +5958,10 @@ class AlpheiosLemmaTranslationsAdapter {
   constructor (config = null) {
     if (config == null) {
       try {
-        let fullconfig = JSON.parse(_config_json__WEBPACK_IMPORTED_MODULE_0__)
+        let fullconfig = JSON.parse(_atsconfig_json__WEBPACK_IMPORTED_MODULE_0__)
         this.config = fullconfig
       } catch (e) {
-        this.config = _config_json__WEBPACK_IMPORTED_MODULE_0__
+        this.config = _atsconfig_json__WEBPACK_IMPORTED_MODULE_0__
       }
     } else {
       this.config = config
@@ -6063,10 +6063,10 @@ class AlpheiosLemmaTranslationsAdapter {
 
 /***/ }),
 
-/***/ "./alpheios/config.json":
-/*!******************************!*\
-  !*** ./alpheios/config.json ***!
-  \******************************/
+/***/ "./alpheios/atsconfig.json":
+/*!*********************************!*\
+  !*** ./alpheios/atsconfig.json ***!
+  \*********************************/
 /*! exports provided: url, availableLangSource, default */
 /***/ (function(module) {
 
