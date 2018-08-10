@@ -17,6 +17,8 @@ export default class DataController {
     this.configFile = configFile
     this.resultData = new CheckTable()
     this.tabDelimiter = tabDelimiter
+
+    console.info('********************constructor', JSON.stringify(tabDelimiter), JSON.stringify(this.tabDelimiter))
   }
 
   async initVue () {
@@ -81,6 +83,7 @@ export default class DataController {
     }
 
     let printDt = DataController.getPrintData()
+    console.info('*******************downloadMorph', JSON.stringify(this.tabDelimiter), this.resultData.morphData)
     FileController.saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: this.tabDelimiter}), printDt + '-morphData.csv')
   }
 
@@ -105,13 +108,13 @@ export default class DataController {
     }
   }
 
-  downloadFailedWords () {
-    if (!this.resultData.failedWords) {
-      this.resultData.createFailedWordsDownload()
+  downloadTranslations () {
+    if (!this.resultData.translationsData) {
+      this.resultData.createTranslationsDataDownload()
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: this.tabDelimiter}), printDt + '-failedWords.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: this.tabDelimiter}), printDt + '-translationsData.csv')
   }
 
   downloadFailedMorph () {
@@ -123,13 +126,40 @@ export default class DataController {
     FileController.saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: this.tabDelimiter}), printDt + '-failedMorph.csv')
   }
 
-  downloadTranslationsClient () {
-    if (!this.resultData.translationsData) {
-      this.resultData.createTranslationsDataDownload()
+  downloadFailedShortDef () {
+    if (!this.resultData.failedShortDef) {
+      this.resultData.createFailedShortDefDownload()
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: this.tabDelimiter}), printDt + '-translationsData.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.failedShortDef, {delimiter: this.tabDelimiter}), printDt + '-failedShortDef.csv')
+  }
+
+  downloadFailedFullDef () {
+    if (!this.resultData.failedFullDef) {
+      this.resultData.createFailedFullDefDownload()
+    }
+
+    let printDt = DataController.getPrintData()
+    FileController.saveFile(csvParser.unparse(this.resultData.failedFullDef, {delimiter: this.tabDelimiter}), printDt + '-failedFullDef.csv')
+  }
+
+  downloadFailedTranslations () {
+    if (!this.resultData.failedTranslations) {
+      this.resultData.createFailedTranslationsDownload()
+    }
+
+    let printDt = DataController.getPrintData()
+    FileController.saveFile(csvParser.unparse(this.resultData.failedTranslations, {delimiter: this.tabDelimiter}), printDt + '-failedTranslations.csv')
+  }
+
+  downloadFailedAnything () {
+    if (!this.resultData.failedAnything) {
+      this.resultData.createFailedAnythingDownload()
+    }
+
+    let printDt = DataController.getPrintData()
+    FileController.saveFile(csvParser.unparse(this.resultData.failedAnything, {delimiter: this.tabDelimiter}), printDt + '-failedAnything.csv')
   }
 
   createVueApp () {
@@ -157,15 +187,27 @@ export default class DataController {
         downloadfulldef () {
           dataController.downloadFullDef()
         },
-        downloadfailedwords () {
-          dataController.downloadFailedWords()
+        downloadtranslations () {
+          dataController.downloadTranslations()
         },
+
         downloadfailedmorph () {
           dataController.downloadFailedMorph()
         },
-        downloadtranslationsclient () {
-          dataController.downloadTranslationsClient()
+
+        downloadfailedshortdef () {
+          dataController.downloadFailedShortDef()
         },
+        downloadfailedfulldef () {
+          dataController.downloadFailedFullDef()
+        },
+        downloadfailedtranslations () {
+          dataController.downloadFailedTranslations()
+        },
+        downloadfailedanything () {
+          dataController.downloadFailedAnything()
+        },
+
         getdata (sourceData, langs) {
           dataController.prepareSourceData(sourceData)
           dataController.resultData.getData(dataController, langs)

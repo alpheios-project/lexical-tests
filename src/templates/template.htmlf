@@ -6,9 +6,14 @@
 		@downloadmorph = "downloadmorph"
 		@downloadshortdef = "downloadshortdef"
 		@downloadfulldef = "downloadfulldef"
+		@downloadtranslations = "downloadtranslations"
+
 		@downloadfailedmorph = "downloadfailedmorph"
-		@downloadfailedwords = "downloadfailedwords"
-		@downloadtranslationsclient = "downloadtranslationsclient"
+		@downloadfailedshortdef = "downloadfailedshortdef"
+		@downloadfailedfulldef = "downloadfailedfulldef"
+		@downloadfailedtranslations = "downloadfailedtranslations"
+		@downloadfailedanything = "downloadfailedanything"
+		
 		@getdata = "getdata"
 		@clearresulttable = "clearresulttable"
 	></resultgrid>

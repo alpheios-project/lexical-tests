@@ -210,6 +210,9 @@
     display: inline-block;
     margin-right: 10px;
 }
+.alpheios-result-grid__list_checkboxes ul {
+  padding: 0 0 10px;
+}
 .alpheios-button_disabled {
   cursor: default;
   background: #f0c8ad;
@@ -223,6 +226,10 @@ li.alpheios-result-grid__list_label {
   color: #dd0000;
   font-weight: bold;
   margin-left: 10px;
+}
+.alpheious_list_delimiter {
+  display: block;
+  min-width: 1px;
 }
 
 

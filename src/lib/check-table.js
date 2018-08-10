@@ -277,7 +277,7 @@ export default class CheckTable {
     this.fullDefData = dictsTables
   }
 
-  createFailedWordsDownload () {
+  createFailedAnythingDownload () {
     let table = []
     let header = ['TargetWord', 'Language', 'MorphClient', 'LemmaWord', 'ShortLexical', 'FullLexical']
     table.push(header)
@@ -316,7 +316,7 @@ export default class CheckTable {
       }
     })
 
-    this.failedWords = table
+    this.failedAnything = table
   }
 
   createFailedMorphDownload () {
@@ -363,5 +363,133 @@ export default class CheckTable {
       }
     })
     this.translationsData = table
+  }
+
+  createFailedTranslationsDownload () {
+    let langs = this.data[0].langs.map(lang => lang.property)
+
+    let table = []
+    let header = ['TargetWord', 'Language', 'Lemma', ...langs]
+
+    table.push(header)
+
+    this.data.forEach(homonym => {
+      let targetWord = homonym.targetWord
+      let langCode = homonym.languageName
+
+      if (homonym.lexemes) {
+        homonym.lexemes.forEach(lexeme => {
+          let langsData = []
+          let lemma = lexeme.lemmaWord
+          for (let lang of langs) {
+            if (!lexeme.translations[lang].glosses) {
+              langsData.push('no')
+            } else {
+              langsData.push(null)
+            }
+          }
+          if (langsData.filter(val => val === 'no').length > 0) {
+            table.push([targetWord, langCode, lemma, ...langsData])
+          }
+        })
+      }
+    })
+    this.failedTranslations = table
+  }
+
+  createFailedShortDefDownload () {
+    let table = []
+
+    let dictsList = this.getDictsList('shortDefData', 'shortDefs')
+
+    let header = ['TargetWord', 'Language', 'LexClient', 'LemmaWord']
+    header = header.concat(dictsList)
+    table.push(header)
+
+    this.data.forEach(homonym => {
+      let targetWord = homonym.targetWord
+      let langCode = homonym.languageName
+
+      if (homonym.lexemes) {
+        homonym.lexemes.forEach(lexeme => {
+          let row = []
+          row.push(targetWord)
+          row.push(langCode)
+          row.push(lexeme.shortDefData.lexClient ? 'yes' : 'no')
+          row.push(lexeme.lemmaWord)
+
+          if (lexeme.shortDefData.shortDefs) {
+            dictsList.forEach(dict => {
+              let dictValue = []
+              lexeme.shortDefData.shortDefs.forEach(def => {
+                if (def.dict === dict && !def.text) { dictValue.push('no') }
+              })
+              if (dictValue.length > 0) {
+                row.push(dictValue.length > 0 ? dictValue.map((item, index) => (dictValue.length > 1 ? (index + 1) + '. ' : '') + item).join(';\r\n') : null)
+              }
+            })
+          }
+          if (row.length > 4) {
+            table.push(row)
+          }
+        })
+      } else {
+        let row = []
+        row.push(targetWord)
+        row.push(langCode)
+        row.push('no')
+        table.push(row)
+      }
+    })
+
+    this.failedShortDef = table
+  }
+
+  createFailedFullDefDownload () {
+    let table = []
+
+    let dictsList = this.getDictsList('fullDefData', 'fullDefs')
+
+    let header = ['TargetWord', 'Language', 'LexClient', 'LemmaWord']
+    header = header.concat(dictsList)
+    table.push(header)
+
+    this.data.forEach(homonym => {
+      let targetWord = homonym.targetWord
+      let langCode = homonym.languageName
+
+      if (homonym.lexemes) {
+        homonym.lexemes.forEach(lexeme => {
+          let row = []
+          row.push(targetWord)
+          row.push(langCode)
+          row.push(lexeme.fullDefData.lexClient ? 'yes' : 'no')
+          row.push(lexeme.lemmaWord)
+
+          if (lexeme.fullDefData.shortDefs) {
+            dictsList.forEach(dict => {
+              let dictValue = []
+              lexeme.fullDefData.shortDefs.forEach(def => {
+                if (def.dict === dict && !def.text) { dictValue.push('no') }
+              })
+              if (dictValue.length > 0) {
+                row.push(dictValue.map((item, index) => (dictValue.length > 1 ? (index + 1) + '. ' : '') + item).join(';\r\n'))
+              }
+            })
+          }
+          if (row.length > 4) {
+            table.push(row)
+          }
+        })
+      } else {
+        let row = []
+        row.push(targetWord)
+        row.push(langCode)
+        row.push('no')
+        table.push(row)
+      }
+    })
+
+    this.failedFullDef = table
   }
 }
