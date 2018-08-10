@@ -54,8 +54,8 @@
               <td colspan="2" :class="emptyClass(homonym.morphClient)">
                 <b>{{ boolenToStr(homonym.morphClient) }}</b>
               </td>
-              <td>{{ homonym.lexiconShortOpts.dicts.join('; ') }}</td>
-              <td>{{ homonym.lexiconFullOpts.dicts.join('; ') }}</td>
+              <td>{{ homonym.lexiconShortOpts ? homonym.lexiconShortOpts.dicts.join('; ') : 'no' }}</td>
+              <td>{{ homonym.lexiconFullOpts ? homonym.lexiconFullOpts.dicts.join('; ') : 'no' }}</td>
               <td>{{ homonym.langs ? homonym.langs.map(lang => lang.property).join('; ') : '' }}</td>
             </tr>
 
@@ -242,10 +242,10 @@
         }
 
         this.sourceData.forEach(word => {
-          if (!word.lexiconShortOpts || !word.lexiconShortOpts.codes) {
+          if (word.lexiconShortOpts && !word.lexiconShortOpts.codes) {
             word.lexiconShortOpts = { codes: [] }
           }
-          if (!word.lexiconFullOpts || !word.lexiconFullOpts.codes) {
+          if (word.lexiconFullOpts && !word.lexiconFullOpts.codes) {
             word.lexiconFullOpts = { codes: [] }
           }
         })

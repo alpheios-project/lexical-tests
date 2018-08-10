@@ -17,8 +17,6 @@ export default class DataController {
     this.configFile = configFile
     this.resultData = new CheckTable()
     this.tabDelimiter = tabDelimiter
-
-    console.info('********************constructor', JSON.stringify(tabDelimiter), JSON.stringify(this.tabDelimiter))
   }
 
   async initVue () {
@@ -63,13 +61,15 @@ export default class DataController {
   }
 
   prepareLexicalConfigs (defOpts, languageCode) {
-    if (!defOpts.codes) { defOpts.codes = [] }
-    if (defOpts.codes.length === 0) {
-      defOpts.codes = Object.keys(this.dictionaries).filter(key => this.dictionaries[key].languageCode === languageCode)
-    }
+    if (defOpts) {
+      if (!defOpts.codes) { defOpts.codes = [] }
+      if (defOpts.codes.length === 0) {
+        defOpts.codes = Object.keys(this.dictionaries).filter(key => this.dictionaries[key].languageCode === languageCode)
+      }
 
-    defOpts.allow = defOpts.codes.map(code => this.dictionaries[code].url)
-    defOpts.dicts = defOpts.codes.map(code => `${code} (${this.dictionaries[code].name})`)
+      defOpts.allow = defOpts.codes.map(code => this.dictionaries[code].url)
+      defOpts.dicts = defOpts.codes.map(code => `${code} (${this.dictionaries[code].name})`)
+    }
   }
 
   static getPrintData () {

@@ -35,8 +35,12 @@ export default class CheckTable {
       if (lexQuery.homonym && lexQuery.homonym.lexemes) {
         lexQuery.homonym.lexemes.forEach(lex => { lex.meaning.shortDefs = [] })
 
-        await this.getShortDefsData(lexQuery, homonymData)
-        await this.getFullDefsData(lexQuery, homonymData)
+        if (lexQuery.lexiconShortOpts) {
+          await this.getShortDefsData(lexQuery, homonymData)
+        }
+        if (lexQuery.lexiconFullOpts) {
+          await this.getFullDefsData(lexQuery, homonymData)
+        }
 
         if (langs.length > 0) {
           await this.getLemmaTranslations(lexQuery, homonymData, langs)
@@ -183,7 +187,7 @@ export default class CheckTable {
     this.data.forEach(homonym => {
       if (homonym.lexemes) {
         homonym.lexemes.forEach(lexeme => {
-          if (lexeme[subArr1][subArr2]) {
+          if (lexeme[subArr1] && lexeme[subArr1][subArr2]) {
             lexeme[subArr1][subArr2].forEach(def => {
               if (dictsList.indexOf(def.dict) === -1) {
                 dictsList.push(def.dict)
@@ -215,10 +219,10 @@ export default class CheckTable {
           let row = []
           row.push(targetWord)
           row.push(langCode)
-          row.push(lexeme.shortDefData.lexClient ? 'yes' : 'no')
+          row.push(lexeme.shortDefData && lexeme.shortDefData.lexClient ? 'yes' : 'no')
           row.push(lexeme.lemmaWord)
 
-          if (lexeme.shortDefData.shortDefs) {
+          if (lexeme.shortDefData && lexeme.shortDefData.shortDefs) {
             dictsList.forEach(dict => {
               let dictValue = []
               lexeme.shortDefData.shortDefs.forEach(def => {
@@ -226,8 +230,8 @@ export default class CheckTable {
               })
               row.push(dictValue.length > 0 ? dictValue.map((item, index) => (dictValue.length > 1 ? (index + 1) + '. ' : '') + item).join(';\r\n') : null)
             })
+            table.push(row)
           }
-          table.push(row)
         })
       } else {
         let row = []
@@ -297,15 +301,19 @@ export default class CheckTable {
           let shortDefsResult = []
           let fullDefsResult = []
 
-          if (lexeme.shortDefData.shortDefs) {
+          if ((lexeme.shortDefData && lexeme.shortDefData.shortDefs) || (lexeme.fullDefData && lexeme.fullDefData.fullDefs)) {
             dictsListShort.forEach(dict => {
               let dictValue = []
-              lexeme.shortDefData.shortDefs.forEach(def => {
-                if (def.dict === dict && !def.text) { shortDefsResult.push(dict + ' - no') }
-              })
-              lexeme.fullDefData.fullDefs.forEach(def => {
-                if (def.dict === dict && !def.text) { fullDefsResult.push(dict + ' - no') }
-              })
+              if (lexeme.shortDefData && lexeme.shortDefData.shortDefs) {
+                lexeme.shortDefData.shortDefs.forEach(def => {
+                  if (def.dict === dict && !def.text) { shortDefsResult.push(dict + ' - no') }
+                })
+              }
+              if (lexeme.fullDefData && lexeme.fullDefData.fullDefs) {
+                lexeme.fullDefData.fullDefs.forEach(def => {
+                  if (def.dict === dict && !def.text) { fullDefsResult.push(dict + ' - no') }
+                })
+              }
             })
           }
 
@@ -338,30 +346,35 @@ export default class CheckTable {
   }
 
   createTranslationsDataDownload () {
-    let langs = this.data[0].langs.map(lang => lang.property)
-
     let table = []
-    let header = ['TargetWord', 'Language', 'Lemma', ...langs]
 
-    table.push(header)
+    if (this.data[0].langs && this.data[0].langs.length > 0) {
+      let langs = this.data[0].langs.map(lang => lang.property)
 
-    this.data.forEach(homonym => {
-      let targetWord = homonym.targetWord
-      let langCode = homonym.languageName
+      let header = ['TargetWord', 'Language', 'Lemma', ...langs]
 
-      if (homonym.lexemes) {
-        homonym.lexemes.forEach(lexeme => {
-          let langsData = []
-          let lemma = lexeme.lemmaWord
-          for (let lang of langs) {
-            if (lexeme.translations[lang].glosses) {
-              langsData.push(lexeme.translations[lang].glosses.join('; '))
+      table.push(header)
+
+      this.data.forEach(homonym => {
+        let targetWord = homonym.targetWord
+        let langCode = homonym.languageName
+
+        if (homonym.lexemes) {
+          homonym.lexemes.forEach(lexeme => {
+            let langsData = []
+            let lemma = lexeme.lemmaWord
+            for (let lang of langs) {
+              if (lexeme.translations[lang].glosses) {
+                langsData.push(lexeme.translations[lang].glosses.join('; '))
+              }
             }
-          }
-          table.push([targetWord, langCode, lemma, ...langsData])
-        })
-      }
-    })
+            table.push([targetWord, langCode, lemma, ...langsData])
+          })
+        }
+      })
+    } else {
+      table.push(['TargetWord', 'Language', 'Lemma'])
+    }
     this.translationsData = table
   }
 
@@ -415,10 +428,10 @@ export default class CheckTable {
           let row = []
           row.push(targetWord)
           row.push(langCode)
-          row.push(lexeme.shortDefData.lexClient ? 'yes' : 'no')
+          row.push(lexeme.shortDefData && lexeme.shortDefData.lexClient ? 'yes' : 'no')
           row.push(lexeme.lemmaWord)
 
-          if (lexeme.shortDefData.shortDefs) {
+          if (lexeme.shortDefData && lexeme.shortDefData.shortDefs) {
             dictsList.forEach(dict => {
               let dictValue = []
               lexeme.shortDefData.shortDefs.forEach(def => {
@@ -463,10 +476,10 @@ export default class CheckTable {
           let row = []
           row.push(targetWord)
           row.push(langCode)
-          row.push(lexeme.fullDefData.lexClient ? 'yes' : 'no')
+          row.push(lexeme.fullDefData && lexeme.fullDefData.lexClient ? 'yes' : 'no')
           row.push(lexeme.lemmaWord)
 
-          if (lexeme.fullDefData.shortDefs) {
+          if (lexeme.fullDefData && lexeme.fullDefData.shortDefs) {
             dictsList.forEach(dict => {
               let dictValue = []
               lexeme.fullDefData.shortDefs.forEach(def => {
