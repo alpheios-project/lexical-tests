@@ -13,15 +13,14 @@ import CheckTable from '@/lib/check-table.js'
 const csvParser = require('papaparse')
 
 export default class DataController {
-  constructor (dataFile = 'data.json', configFile = 'libraryConfig.json') {
-    this.dataFile = dataFile
+  constructor (configFile = 'libraryConfig.json', tabDelimiter = '\t') {
     this.configFile = configFile
     this.resultData = new CheckTable()
+    this.tabDelimiter = tabDelimiter
   }
 
   async initVue () {
     await this.loadConfigData()
-    // await this.loadSourceData()
     this.createVueApp()
   }
 
@@ -50,17 +49,6 @@ export default class DataController {
     return langRes
   }
 
-  async loadSourceData () {
-    if (this.dataFile) {
-      try {
-        let sourceData = await FileController.getFileContents(this.dataFile)
-        this.prepareSourceData(sourceData)
-      } catch (err) {
-        console.error('Some problems with loading source data', err.message)
-      }
-    }
-  }
-
   prepareSourceData (sourceData) {
     sourceData.forEach(dataItem => {
       dataItem.languageID = this.languages[dataItem.languageCode].const
@@ -73,13 +61,15 @@ export default class DataController {
   }
 
   prepareLexicalConfigs (defOpts, languageCode) {
-    if (!defOpts.codes) { defOpts.codes = [] }
-    if (defOpts.codes.length === 0) {
-      defOpts.codes = Object.keys(this.dictionaries).filter(key => this.dictionaries[key].languageCode === languageCode)
-    }
+    if (defOpts) {
+      if (!defOpts.codes) { defOpts.codes = [] }
+      if (defOpts.codes.length === 0) {
+        defOpts.codes = Object.keys(this.dictionaries).filter(key => this.dictionaries[key].languageCode === languageCode)
+      }
 
-    defOpts.allow = defOpts.codes.map(code => this.dictionaries[code].url)
-    defOpts.dicts = defOpts.codes.map(code => `${code} (${this.dictionaries[code].name})`)
+      defOpts.allow = defOpts.codes.map(code => this.dictionaries[code].url)
+      defOpts.dicts = defOpts.codes.map(code => `${code} (${this.dictionaries[code].name})`)
+    }
   }
 
   static getPrintData () {
@@ -93,7 +83,7 @@ export default class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: ';'}), printDt + '-morphData.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: this.tabDelimiter}), printDt + '-morphData.csv')
   }
 
   downloadShortDef () {
@@ -102,7 +92,7 @@ export default class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.shortDefData, {delimiter: ';'}), printDt + '-shortDefData.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.shortDefData, {delimiter: this.tabDelimiter}), printDt + '-shortDefData.csv')
   }
 
   downloadFullDef () {
@@ -117,13 +107,13 @@ export default class DataController {
     }
   }
 
-  downloadFailedWords () {
-    if (!this.resultData.failedWords) {
-      this.resultData.createFailedWordsDownload()
+  downloadTranslations () {
+    if (!this.resultData.translationsData) {
+      this.resultData.createTranslationsDataDownload()
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: ';'}), printDt + '-failedWords.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: this.tabDelimiter}), printDt + '-translationsData.csv')
   }
 
   downloadFailedMorph () {
@@ -132,16 +122,43 @@ export default class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: ';'}), printDt + '-failedMorph.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: this.tabDelimiter}), printDt + '-failedMorph.csv')
   }
 
-  downloadTranslationsClient () {
-    if (!this.resultData.translationsData) {
-      this.resultData.createTranslationsDataDownload()
+  downloadFailedShortDef () {
+    if (!this.resultData.failedShortDef) {
+      this.resultData.createFailedShortDefDownload()
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: ';'}), printDt + '-translationsData.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.failedShortDef, {delimiter: this.tabDelimiter}), printDt + '-failedShortDef.csv')
+  }
+
+  downloadFailedFullDef () {
+    if (!this.resultData.failedFullDef) {
+      this.resultData.createFailedFullDefDownload()
+    }
+
+    let printDt = DataController.getPrintData()
+    FileController.saveFile(csvParser.unparse(this.resultData.failedFullDef, {delimiter: this.tabDelimiter}), printDt + '-failedFullDef.csv')
+  }
+
+  downloadFailedTranslations () {
+    if (!this.resultData.failedTranslations) {
+      this.resultData.createFailedTranslationsDownload()
+    }
+
+    let printDt = DataController.getPrintData()
+    FileController.saveFile(csvParser.unparse(this.resultData.failedTranslations, {delimiter: this.tabDelimiter}), printDt + '-failedTranslations.csv')
+  }
+
+  downloadFailedAnything () {
+    if (!this.resultData.failedAnything) {
+      this.resultData.createFailedAnythingDownload()
+    }
+
+    let printDt = DataController.getPrintData()
+    FileController.saveFile(csvParser.unparse(this.resultData.failedAnything, {delimiter: this.tabDelimiter}), printDt + '-failedAnything.csv')
   }
 
   createVueApp () {
@@ -169,18 +186,30 @@ export default class DataController {
         downloadfulldef () {
           dataController.downloadFullDef()
         },
-        downloadfailedwords () {
-          dataController.downloadFailedWords()
+        downloadtranslations () {
+          dataController.downloadTranslations()
         },
+
         downloadfailedmorph () {
           dataController.downloadFailedMorph()
         },
-        downloadtranslationsclient () {
-          dataController.downloadTranslationsClient()
+
+        downloadfailedshortdef () {
+          dataController.downloadFailedShortDef()
         },
-        getdata (sourceData, langs) {
+        downloadfailedfulldef () {
+          dataController.downloadFailedFullDef()
+        },
+        downloadfailedtranslations () {
+          dataController.downloadFailedTranslations()
+        },
+        downloadfailedanything () {
+          dataController.downloadFailedAnything()
+        },
+
+        getdata (sourceData, langs, skipShortDefs, skipFullDefs) {
           dataController.prepareSourceData(sourceData)
-          dataController.resultData.getData(dataController, langs)
+          dataController.resultData.getData(dataController, langs, skipShortDefs, skipFullDefs)
         },
         clearresulttable () {
           dataController.resultData.clear(dataController)

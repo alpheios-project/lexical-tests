@@ -1,26 +1,29 @@
 <template>
   <div id="alpheios-result-grid">
     <p v-if="uploadError" class="alpheios-result__error">{{ uploadError }}</p>
-    <div class="alpheios-result-grid__file_block">
+
+    <div class="alpheios-result-grid__file_block block1">
       <label>
         <input type="file" id="alpheios-result-grid__file" ref="sourcefile" v-on:change="handleFileUpload()"/>
         <span>Choose file</span>
       </label>
       <p class="alpheios-result-grid__file_name" v-if="file">{{ file.name }}, {{ fileSize }}Kb</p>
+    </div>
+
+    <div class="alpheios-result-grid__file_block block2">
       <button v-on:click="uploadFile()" class="alpheios-result-grid__upload_file" :class="disabledClass(file)">Upload data</button>
       <p class="alpheios-result-grid__file_name" v-if="sourceData">Words - {{ sourceData.length }}</p>
+    </div>
       
-    </div> 
     
+    <ul class="alpheios-result-grid__list_checkboxes">
+      <li class="alpheios-result-grid__list_label">Skip checks:</li>
+      <li><checkbox-block label = "Short defs" :value = "checkboxes.skipShortDefs"" property="skipShortDefs" @input = 'updateProperty'></checkbox-block></li>
+      <li><checkbox-block label = "Full defs" :value = "checkboxes.skipFullDefs"" property="skipFullDefs" @input = 'updateProperty'></checkbox-block></li>
+    </ul>
+
     <ul class="alpheios-result-grid__list_checkboxes" v-if="langs.length > 0">
       <li class="alpheios-result-grid__list_label">Languages for translations:</li>
-<!--       <li><checkbox-block label = 'Eng' :value = 'checkboxes.eng' property="eng" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Fre' :value = 'checkboxes.fre' property="fre" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Ita' :value = 'checkboxes.ita' property="ita" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Por' :value = 'checkboxes.por' property="por" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Cat' :value = 'checkboxes.cat' property="cat" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Ger' :value = 'checkboxes.ger' property="ger" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Spa' :value = 'checkboxes.spa' property="spa" @input = 'updateProperty'></checkbox-block></li> -->
       <li v-for="lang in langs">
         <checkbox-block :label = "lang.property" :value = "checkboxes[lang.property]"" :property="lang.property" @input = 'updateProperty'></checkbox-block>
       </li>
@@ -28,13 +31,19 @@
 
     <p class="alpheios-result-grid__file_block"><button v-on:click="checkData()" class="alpheios-result-grid__upload_file" :class="disabledClass(sourceData)">Check data</button></p>
     <ul class="alpheios-result-grid__list_checkboxes">
-      <li><checkbox-block label = 'Morph Data' :value = 'checkboxes.morphClient' property="morphClient" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Short Lex Data' :value = 'checkboxes.shortLexClient' property="shortLexClient" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Full Lex Data' :value = 'checkboxes.fullLexClient' property="fullLexClient" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Failed Morph Data' :value = 'checkboxes.failedMorphClient' property="failedMorphClient" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Failed Morph and Lex Data' :value = 'checkboxes.failedMorphAndLex' property="failedMorphAndLex" @input = 'updateProperty'></checkbox-block></li>
-      <li><checkbox-block label = 'Translations' :value = 'checkboxes.translationsClient' property="translationsClient" @input = 'updateProperty' v-if="langs.length > 0"></checkbox-block></li>
-      
+      <li><ul>
+        <li><checkbox-block label = 'Morph' :value = 'checkboxes.morphClient' property="morph" @input = 'updateProperty'></checkbox-block></li>
+        <li><checkbox-block :disabledInput = 'skipShortDefs' label = 'Short Def' :value = 'checkboxes.shortDef' property="shortDef" @input = 'updateProperty'></checkbox-block></li>
+        <li><checkbox-block :disabledInput = 'skipFullDefs' label = 'Full Def' :value = 'checkboxes.fullDef' property="fullDef" @input = 'updateProperty'></checkbox-block></li>
+        <li><checkbox-block :disabledInput = 'skipTranslations' label = 'Translations' :value = 'checkboxes.translations' property="translations" @input = 'updateProperty' v-if="langs.length > 0"></checkbox-block></li>
+      </ul></li>
+      <li><ul>
+        <li><checkbox-block label = 'Failed Morph' :value = 'checkboxes.failedMorph' property="failedMorph" @input = 'updateProperty'></checkbox-block></li>
+        <li><checkbox-block :disabledInput = 'skipShortDefs' label = 'Failed Short Def' :value = 'checkboxes.failedShortDef' property="failedShortDef" @input = 'updateProperty'></checkbox-block></li>
+        <li><checkbox-block :disabledInput = 'skipFullDefs' label = 'Failed Full Def' :value = 'checkboxes.failedFullDef' property="failedFullDef" @input = 'updateProperty'></checkbox-block></li>
+        <li><checkbox-block :disabledInput = 'skipTranslations' label = 'Failed Translations' :value = 'checkboxes.failedTranslations' property="failedTranslations" @input = 'updateProperty'></checkbox-block></li>
+        <li><checkbox-block label = 'Failed Anything' :value = 'checkboxes.failedAnything' property="failedAnything" @input = 'updateProperty'></checkbox-block></li>
+      </ul></li>
       <li @click = "downloadSelected" :class="disabledClass(downloadEnabled)" class="alpheios-result-grid__download_button">Download selected</li>
     </ul>
     <span v-if="tableready !== null && tableready !== true" class="alpheios-result-grid__loader"></span>
@@ -55,8 +64,8 @@
               <td colspan="2" :class="emptyClass(homonym.morphClient)">
                 <b>{{ boolenToStr(homonym.morphClient) }}</b>
               </td>
-              <td>{{ homonym.lexiconShortOpts.dicts.join('; ') }}</td>
-              <td>{{ homonym.lexiconFullOpts.dicts.join('; ') }}</td>
+              <td>{{ !skipShortDefs && homonym.lexiconShortOpts ? homonym.lexiconShortOpts.dicts.join('; ') : 'no' }}</td>
+              <td>{{ !skipFullDefs && homonym.lexiconFullOpts ? homonym.lexiconFullOpts.dicts.join('; ') : 'no' }}</td>
               <td>{{ homonym.langs ? homonym.langs.map(lang => lang.property).join('; ') : '' }}</td>
             </tr>
 
@@ -149,12 +158,19 @@
         file: null,
         sourceData: null,
         checkboxes: {
-          morphClient: false,
-          shortLexClient: false,
-          fullLexClient: false,
-          failedMorphClient: false,
-          failedMorphAndLex: false,
-          translationsClient: false
+          morph: false,
+          shortDef: false,
+          fullDef: false,
+          translations: false,
+
+          failedMorph: false,
+          failedShortDef: false,
+          failedFullDef: false,
+          failedTranslations: false,
+          failedAnything: false,
+
+          skipShortDefs: false,
+          skipFullDefs: false
         },
         langs: [],
         uploadError: null
@@ -177,6 +193,19 @@
         let downloads = Object.keys(this.checkboxes).filter(key => this.checkboxes[key] && !this.langs.map(lang => lang.property).includes(key))
 
         return this.tableready && (downloads.length > 0)
+      },
+      skipTranslations () {
+        if (this.resulttable.length === 0) {
+          return false
+        }
+        console.info('********************this.resulttable[0].langs', this.resulttable)
+        return !this.resulttable[0].langs ? true : false
+      },
+      skipShortDefs () {
+        return this.resulttable.length > 0 ? this.resulttable[0].skipShortDefs : false
+      },
+      skipFullDefs () {
+        return this.resulttable.length > 0 ? this.resulttable[0].skipFullDefs : false
       }
     },
     watch: {
@@ -238,10 +267,10 @@
         }
 
         this.sourceData.forEach(word => {
-          if (!word.lexiconShortOpts || !word.lexiconShortOpts.codes) {
+          if (word.lexiconShortOpts && !word.lexiconShortOpts.codes) {
             word.lexiconShortOpts = { codes: [] }
           }
-          if (!word.lexiconFullOpts || !word.lexiconFullOpts.codes) {
+          if (word.lexiconFullOpts && !word.lexiconFullOpts.codes) {
             word.lexiconFullOpts = { codes: [] }
           }
         })
@@ -281,41 +310,69 @@
           this.$emit('downloadfulldef')
         }
       },
-      downloadFailedWords () {
+      downloadTranslations () {
         if (this.tableready) {
-          this.$emit('downloadfailedwords')
+          this.$emit('downloadtranslations')
         }
       },
+      
       downloadFailedMorph () {
         if (this.tableready) {
           this.$emit('downloadfailedmorph')
         }
       },
-      downloadTranslationsClient () {
+      downloadFailedShortDef () {
         if (this.tableready) {
-          this.$emit('downloadtranslationsclient')
+          this.$emit('downloadfailedshortdef')
         }
       },
+      downloadFailedFullDef () {
+        if (this.tableready) {
+          this.$emit('downloadfailedfulldef')
+        }
+      },
+      downloadFailedTranslations () {
+        if (this.tableready) {
+          this.$emit('downloadfailedtranslations')
+        }
+      },
+      downloadFailedAnything () {
+        if (this.tableready) {
+          this.$emit('downloadfailedanything')
+        }
+      },
+      
       downloadSelected () {
         if (this.tableready) {
-          if (this.checkboxes.morphClient) {
+          if (this.checkboxes.morph) {
             this.downloadMorph()
           }
-          if (this.checkboxes.shortLexClient) {
+          if (this.checkboxes.shortDef) {
             this.downloadShortDef()
           }
-          if (this.checkboxes.fullLexClient) {
+          if (this.checkboxes.fullDef) {
             this.downloadFullDef()
           }
-          if (this.checkboxes.failedMorphClient) {
+          if (this.checkboxes.translations) {
+            this.downloadTranslations()
+          }
+
+          if (this.checkboxes.failedMorph) {
             this.downloadFailedMorph()
           }
-          if (this.checkboxes.failedMorphAndLex) {
-            this.downloadFailedWords()
+          if (this.checkboxes.failedShortDef) {
+            this.downloadFailedShortDef()
           }
-          if (this.checkboxes.translationsClient) {
-            this.downloadTranslationsClient()
+          if (this.checkboxes.failedFullDef) {
+            this.downloadFailedFullDef()
           }
+          if (this.checkboxes.failedTranslations) {
+            this.downloadFailedTranslations()
+          }
+          if (this.checkboxes.failedAnything) {
+            this.downloadFailedAnything()
+          }
+          
           
         }
       },
@@ -327,7 +384,7 @@
           let langsProps = Object.keys(this.checkboxes).filter(key => this.checkboxes[key] && this.langs.map(lang => lang.property).includes(key))
 
           let langs = this.langs.filter(lang => langsProps.includes(lang.property))
-          this.$emit('getdata', this.sourceData, langs)
+          this.$emit('getdata', this.sourceData, langs, this.checkboxes.skipShortDefs, this.checkboxes.skipFullDefs)
         }
       }
     }
@@ -436,6 +493,8 @@
     margin: 0 10px;
     display: inline-block;
     vertical-align: middle;
+    text-align: center;
+
 	  label {
 		display: inline-block;
 		background: #3498db;
@@ -450,6 +509,13 @@
 	  span {
 		font-weight:bold;
 	  }
+
+    &.block1 {
+      max-width: 200px;
+    }
+    &.block2 {
+      max-width: 130px;
+    }
 	}
 
 	.alpheios-result-grid__file_name {
@@ -488,6 +554,9 @@
     }
   }
 
+  .alpheios-result-grid__list_checkboxes ul {
+    padding: 0 0 10px;
+  }
   .alpheios-button_disabled {
     cursor: default;
     background: #f0c8ad;
@@ -503,5 +572,10 @@
     color: #dd0000;
     font-weight: bold;
     margin-left: 10px;
+  }
+
+  .alpheious_list_delimiter {
+    display: block;
+    min-width: 1px;
   }
 </style>

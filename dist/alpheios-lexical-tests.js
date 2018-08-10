@@ -20144,6 +20144,11 @@ __webpack_require__.r(__webpack_exports__);
       type: String,
       required: false,
       default: ''
+    },
+    disabledInput: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   data() {
@@ -20169,6 +20174,15 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _vue_components_checkbox_block_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/vue-components/checkbox-block.vue */ "./vue-components/checkbox-block.vue");
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -20320,12 +20334,19 @@ __webpack_require__.r(__webpack_exports__);
         file: null,
         sourceData: null,
         checkboxes: {
-          morphClient: false,
-          shortLexClient: false,
-          fullLexClient: false,
-          failedMorphClient: false,
-          failedMorphAndLex: false,
-          translationsClient: false
+          morph: false,
+          shortDef: false,
+          fullDef: false,
+          translations: false,
+
+          failedMorph: false,
+          failedShortDef: false,
+          failedFullDef: false,
+          failedTranslations: false,
+          failedAnything: false,
+
+          skipShortDefs: false,
+          skipFullDefs: false
         },
         langs: [],
         uploadError: null
@@ -20348,6 +20369,19 @@ __webpack_require__.r(__webpack_exports__);
         let downloads = Object.keys(this.checkboxes).filter(key => this.checkboxes[key] && !this.langs.map(lang => lang.property).includes(key))
 
         return this.tableready && (downloads.length > 0)
+      },
+      skipTranslations () {
+        if (this.resulttable.length === 0) {
+          return false
+        }
+        console.info('********************this.resulttable[0].langs', this.resulttable)
+        return !this.resulttable[0].langs ? true : false
+      },
+      skipShortDefs () {
+        return this.resulttable.length > 0 ? this.resulttable[0].skipShortDefs : false
+      },
+      skipFullDefs () {
+        return this.resulttable.length > 0 ? this.resulttable[0].skipFullDefs : false
       }
     },
     watch: {
@@ -20409,10 +20443,10 @@ __webpack_require__.r(__webpack_exports__);
         }
 
         this.sourceData.forEach(word => {
-          if (!word.lexiconShortOpts || !word.lexiconShortOpts.codes) {
+          if (word.lexiconShortOpts && !word.lexiconShortOpts.codes) {
             word.lexiconShortOpts = { codes: [] }
           }
-          if (!word.lexiconFullOpts || !word.lexiconFullOpts.codes) {
+          if (word.lexiconFullOpts && !word.lexiconFullOpts.codes) {
             word.lexiconFullOpts = { codes: [] }
           }
         })
@@ -20452,41 +20486,69 @@ __webpack_require__.r(__webpack_exports__);
           this.$emit('downloadfulldef')
         }
       },
-      downloadFailedWords () {
+      downloadTranslations () {
         if (this.tableready) {
-          this.$emit('downloadfailedwords')
+          this.$emit('downloadtranslations')
         }
       },
+      
       downloadFailedMorph () {
         if (this.tableready) {
           this.$emit('downloadfailedmorph')
         }
       },
-      downloadTranslationsClient () {
+      downloadFailedShortDef () {
         if (this.tableready) {
-          this.$emit('downloadtranslationsclient')
+          this.$emit('downloadfailedshortdef')
         }
       },
+      downloadFailedFullDef () {
+        if (this.tableready) {
+          this.$emit('downloadfailedfulldef')
+        }
+      },
+      downloadFailedTranslations () {
+        if (this.tableready) {
+          this.$emit('downloadfailedtranslations')
+        }
+      },
+      downloadFailedAnything () {
+        if (this.tableready) {
+          this.$emit('downloadfailedanything')
+        }
+      },
+      
       downloadSelected () {
         if (this.tableready) {
-          if (this.checkboxes.morphClient) {
+          if (this.checkboxes.morph) {
             this.downloadMorph()
           }
-          if (this.checkboxes.shortLexClient) {
+          if (this.checkboxes.shortDef) {
             this.downloadShortDef()
           }
-          if (this.checkboxes.fullLexClient) {
+          if (this.checkboxes.fullDef) {
             this.downloadFullDef()
           }
-          if (this.checkboxes.failedMorphClient) {
+          if (this.checkboxes.translations) {
+            this.downloadTranslations()
+          }
+
+          if (this.checkboxes.failedMorph) {
             this.downloadFailedMorph()
           }
-          if (this.checkboxes.failedMorphAndLex) {
-            this.downloadFailedWords()
+          if (this.checkboxes.failedShortDef) {
+            this.downloadFailedShortDef()
           }
-          if (this.checkboxes.translationsClient) {
-            this.downloadTranslationsClient()
+          if (this.checkboxes.failedFullDef) {
+            this.downloadFailedFullDef()
           }
+          if (this.checkboxes.failedTranslations) {
+            this.downloadFailedTranslations()
+          }
+          if (this.checkboxes.failedAnything) {
+            this.downloadFailedAnything()
+          }
+          
           
         }
       },
@@ -20498,7 +20560,7 @@ __webpack_require__.r(__webpack_exports__);
           let langsProps = Object.keys(this.checkboxes).filter(key => this.checkboxes[key] && this.langs.map(lang => lang.property).includes(key))
 
           let langs = this.langs.filter(lang => langsProps.includes(lang.property))
-          this.$emit('getdata', this.sourceData, langs)
+          this.$emit('getdata', this.sourceData, langs, this.checkboxes.skipShortDefs, this.checkboxes.skipFullDefs)
         }
       }
     }
@@ -20522,46 +20584,53 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("label", { staticClass: "alpheios-checkbox_container" }, [
-    _vm._v(_vm._s(_vm.label) + "\n\t"),
-    _c("input", {
-      directives: [
-        {
-          name: "model",
-          rawName: "v-model",
-          value: _vm.inputVal,
-          expression: "inputVal"
-        }
-      ],
-      attrs: { type: "checkbox" },
-      domProps: {
-        checked: Array.isArray(_vm.inputVal)
-          ? _vm._i(_vm.inputVal, null) > -1
-          : _vm.inputVal
-      },
-      on: {
-        change: function($event) {
-          var $$a = _vm.inputVal,
-            $$el = $event.target,
-            $$c = $$el.checked ? true : false
-          if (Array.isArray($$a)) {
-            var $$v = null,
-              $$i = _vm._i($$a, $$v)
-            if ($$el.checked) {
-              $$i < 0 && (_vm.inputVal = $$a.concat([$$v]))
+  return _c(
+    "label",
+    {
+      staticClass: "alpheios-checkbox_container",
+      class: { alpheious_disabled_input: _vm.disabledInput }
+    },
+    [
+      _vm._v(_vm._s(_vm.label) + "\n\t"),
+      _c("input", {
+        directives: [
+          {
+            name: "model",
+            rawName: "v-model",
+            value: _vm.inputVal,
+            expression: "inputVal"
+          }
+        ],
+        attrs: { disabled: _vm.disabledInput, type: "checkbox" },
+        domProps: {
+          checked: Array.isArray(_vm.inputVal)
+            ? _vm._i(_vm.inputVal, null) > -1
+            : _vm.inputVal
+        },
+        on: {
+          change: function($event) {
+            var $$a = _vm.inputVal,
+              $$el = $event.target,
+              $$c = $$el.checked ? true : false
+            if (Array.isArray($$a)) {
+              var $$v = null,
+                $$i = _vm._i($$a, $$v)
+              if ($$el.checked) {
+                $$i < 0 && (_vm.inputVal = $$a.concat([$$v]))
+              } else {
+                $$i > -1 &&
+                  (_vm.inputVal = $$a.slice(0, $$i).concat($$a.slice($$i + 1)))
+              }
             } else {
-              $$i > -1 &&
-                (_vm.inputVal = $$a.slice(0, $$i).concat($$a.slice($$i + 1)))
+              _vm.inputVal = $$c
             }
-          } else {
-            _vm.inputVal = $$c
           }
         }
-      }
-    }),
-    _vm._v(" "),
-    _c("span", { staticClass: "alpheios-checkbox_checkmark" })
-  ])
+      }),
+      _vm._v(" "),
+      _c("span", { staticClass: "alpheios-checkbox_checkmark" })
+    ]
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -20592,7 +20661,7 @@ var render = function() {
         ])
       : _vm._e(),
     _vm._v(" "),
-    _c("div", { staticClass: "alpheios-result-grid__file_block" }, [
+    _c("div", { staticClass: "alpheios-result-grid__file_block block1" }, [
       _c("label", [
         _c("input", {
           ref: "sourcefile",
@@ -20611,8 +20680,10 @@ var render = function() {
         ? _c("p", { staticClass: "alpheios-result-grid__file_name" }, [
             _vm._v(_vm._s(_vm.file.name) + ", " + _vm._s(_vm.fileSize) + "Kb")
           ])
-        : _vm._e(),
-      _vm._v(" "),
+        : _vm._e()
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "alpheios-result-grid__file_block block2" }, [
       _c(
         "button",
         {
@@ -20632,6 +20703,42 @@ var render = function() {
             _vm._v("Words - " + _vm._s(_vm.sourceData.length))
           ])
         : _vm._e()
+    ]),
+    _vm._v(" "),
+    _c("ul", { staticClass: "alpheios-result-grid__list_checkboxes" }, [
+      _c("li", { staticClass: "alpheios-result-grid__list_label" }, [
+        _vm._v("Skip checks:")
+      ]),
+      _vm._v(" "),
+      _c(
+        "li",
+        [
+          _c("checkbox-block", {
+            attrs: {
+              label: "Short defs",
+              value: _vm.checkboxes.skipShortDefs,
+              property: "skipShortDefs"
+            },
+            on: { input: _vm.updateProperty }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "li",
+        [
+          _c("checkbox-block", {
+            attrs: {
+              label: "Full defs",
+              value: _vm.checkboxes.skipFullDefs,
+              property: "skipFullDefs"
+            },
+            on: { input: _vm.updateProperty }
+          })
+        ],
+        1
+      )
     ]),
     _vm._v(" "),
     _vm.langs.length > 0
@@ -20681,97 +20788,156 @@ var render = function() {
     ]),
     _vm._v(" "),
     _c("ul", { staticClass: "alpheios-result-grid__list_checkboxes" }, [
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: {
-              label: "Morph Data",
-              value: _vm.checkboxes.morphClient,
-              property: "morphClient"
-            },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: {
-              label: "Short Lex Data",
-              value: _vm.checkboxes.shortLexClient,
-              property: "shortLexClient"
-            },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: {
-              label: "Full Lex Data",
-              value: _vm.checkboxes.fullLexClient,
-              property: "fullLexClient"
-            },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: {
-              label: "Failed Morph Data",
-              value: _vm.checkboxes.failedMorphClient,
-              property: "failedMorphClient"
-            },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _c("checkbox-block", {
-            attrs: {
-              label: "Failed Morph and Lex Data",
-              value: _vm.checkboxes.failedMorphAndLex,
-              property: "failedMorphAndLex"
-            },
-            on: { input: _vm.updateProperty }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "li",
-        [
-          _vm.langs.length > 0
-            ? _c("checkbox-block", {
+      _c("li", [
+        _c("ul", [
+          _c(
+            "li",
+            [
+              _c("checkbox-block", {
                 attrs: {
-                  label: "Translations",
-                  value: _vm.checkboxes.translationsClient,
-                  property: "translationsClient"
+                  label: "Morph",
+                  value: _vm.checkboxes.morphClient,
+                  property: "morph"
                 },
                 on: { input: _vm.updateProperty }
               })
-            : _vm._e()
-        ],
-        1
-      ),
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "li",
+            [
+              _c("checkbox-block", {
+                attrs: {
+                  disabledInput: _vm.skipShortDefs,
+                  label: "Short Def",
+                  value: _vm.checkboxes.shortDef,
+                  property: "shortDef"
+                },
+                on: { input: _vm.updateProperty }
+              })
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "li",
+            [
+              _c("checkbox-block", {
+                attrs: {
+                  disabledInput: _vm.skipFullDefs,
+                  label: "Full Def",
+                  value: _vm.checkboxes.fullDef,
+                  property: "fullDef"
+                },
+                on: { input: _vm.updateProperty }
+              })
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "li",
+            [
+              _vm.langs.length > 0
+                ? _c("checkbox-block", {
+                    attrs: {
+                      disabledInput: _vm.skipTranslations,
+                      label: "Translations",
+                      value: _vm.checkboxes.translations,
+                      property: "translations"
+                    },
+                    on: { input: _vm.updateProperty }
+                  })
+                : _vm._e()
+            ],
+            1
+          )
+        ])
+      ]),
+      _vm._v(" "),
+      _c("li", [
+        _c("ul", [
+          _c(
+            "li",
+            [
+              _c("checkbox-block", {
+                attrs: {
+                  label: "Failed Morph",
+                  value: _vm.checkboxes.failedMorph,
+                  property: "failedMorph"
+                },
+                on: { input: _vm.updateProperty }
+              })
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "li",
+            [
+              _c("checkbox-block", {
+                attrs: {
+                  disabledInput: _vm.skipShortDefs,
+                  label: "Failed Short Def",
+                  value: _vm.checkboxes.failedShortDef,
+                  property: "failedShortDef"
+                },
+                on: { input: _vm.updateProperty }
+              })
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "li",
+            [
+              _c("checkbox-block", {
+                attrs: {
+                  disabledInput: _vm.skipFullDefs,
+                  label: "Failed Full Def",
+                  value: _vm.checkboxes.failedFullDef,
+                  property: "failedFullDef"
+                },
+                on: { input: _vm.updateProperty }
+              })
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "li",
+            [
+              _c("checkbox-block", {
+                attrs: {
+                  disabledInput: _vm.skipTranslations,
+                  label: "Failed Translations",
+                  value: _vm.checkboxes.failedTranslations,
+                  property: "failedTranslations"
+                },
+                on: { input: _vm.updateProperty }
+              })
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "li",
+            [
+              _c("checkbox-block", {
+                attrs: {
+                  label: "Failed Anything",
+                  value: _vm.checkboxes.failedAnything,
+                  property: "failedAnything"
+                },
+                on: { input: _vm.updateProperty }
+              })
+            ],
+            1
+          )
+        ])
+      ]),
       _vm._v(" "),
       _c(
         "li",
@@ -20825,11 +20991,23 @@ var render = function() {
                 ),
                 _vm._v(" "),
                 _c("td", [
-                  _vm._v(_vm._s(homonym.lexiconShortOpts.dicts.join("; ")))
+                  _vm._v(
+                    _vm._s(
+                      !_vm.skipShortDefs && homonym.lexiconShortOpts
+                        ? homonym.lexiconShortOpts.dicts.join("; ")
+                        : "no"
+                    )
+                  )
                 ]),
                 _vm._v(" "),
                 _c("td", [
-                  _vm._v(_vm._s(homonym.lexiconFullOpts.dicts.join("; ")))
+                  _vm._v(
+                    _vm._s(
+                      !_vm.skipFullDefs && homonym.lexiconFullOpts
+                        ? homonym.lexiconFullOpts.dicts.join("; ")
+                        : "no"
+                    )
+                  )
                 ]),
                 _vm._v(" "),
                 _c("td", [
@@ -20865,7 +21043,7 @@ var render = function() {
                           _vm._v(
                             " - " +
                               _vm._s(value ? value : "no data") +
-                              "\n                    "
+                              "\n                  "
                           )
                         ])
                       })
@@ -21044,7 +21222,7 @@ var render = function() {
                                 _vm._v(
                                   " - " +
                                     _vm._s(trans.glosses.join("; ")) +
-                                    "\n                    "
+                                    "\n                  "
                                 )
                               ])
                             : _vm._e(),
@@ -21052,7 +21230,7 @@ var render = function() {
                           !trans.glosses
                             ? _c("span", { class: _vm.emptyClass(false) }, [
                                 _c("b", [_vm._v(_vm._s(trans.languageCode))]),
-                                _vm._v(" - no\n                    ")
+                                _vm._v(" - no\n                  ")
                               ])
                             : _vm._e()
                         ])
@@ -32225,9 +32403,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Embedded {
-  constructor () {
+  constructor (configFile, tabDelimiter) {
     this.resultsId = 'alpheios-tests-results'
-    this.dataController = new _lib_data_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"]()
+    this.dataController = new _lib_data_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"](configFile, tabDelimiter)
     this.dataController.initVue()
   }
 }
@@ -32273,7 +32451,7 @@ class CheckTable {
     vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', null)
   }
 
-  async getData (dataController, langs = []) {
+  async getData (dataController, langs = [], skipShortDefs = false, skipFullDefs = false) {
     vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', false)
 
     let sourceData = dataController.sourceData
@@ -32281,14 +32459,18 @@ class CheckTable {
       let sourceItem = sourceData[i]
       let lexQuery = new _lib_lexical_query_js__WEBPACK_IMPORTED_MODULE_0__["default"](sourceItem)
 
-      let homonymData = await this.getMorphData(lexQuery)
+      let homonymData = await this.getMorphData(lexQuery, langs, skipShortDefs, skipFullDefs)
       this.data.push(homonymData)
 
       if (lexQuery.homonym && lexQuery.homonym.lexemes) {
         lexQuery.homonym.lexemes.forEach(lex => { lex.meaning.shortDefs = [] })
 
-        await this.getShortDefsData(lexQuery, homonymData)
-        await this.getFullDefsData(lexQuery, homonymData)
+        if (lexQuery.lexiconShortOpts && !skipShortDefs) {
+          await this.getShortDefsData(lexQuery, homonymData)
+        }
+        if (lexQuery.lexiconFullOpts && !skipFullDefs) {
+          await this.getFullDefsData(lexQuery, homonymData)
+        }
 
         if (langs.length > 0) {
           await this.getLemmaTranslations(lexQuery, homonymData, langs)
@@ -32300,13 +32482,17 @@ class CheckTable {
     vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', true)
   }
 
-  async getMorphData (lexQuery) {
+  async getMorphData (lexQuery, langs, skipShortDefs, skipFullDefs) {
     let homonymData = {
       targetWord: lexQuery.targetWord,
       languageID: lexQuery.languageID,
       languageName: lexQuery.languageName,
       lexiconShortOpts: lexQuery.lexiconShortOpts,
       lexiconFullOpts: lexQuery.lexiconFullOpts,
+
+      skipShortDefs: skipShortDefs,
+      skipFullDefs: skipFullDefs,
+      langs: langs,
 
       morphClient: false
     }
@@ -32360,7 +32546,6 @@ class CheckTable {
   }
 
   async getLemmaTranslations (lexQuery, homonymData, langs) {
-    homonymData.langs = langs
     await lexQuery.getLemmaTranslations(langs)
 
     lexQuery.homonym.lexemes.forEach((lexeme, index) => {
@@ -32435,7 +32620,7 @@ class CheckTable {
     this.data.forEach(homonym => {
       if (homonym.lexemes) {
         homonym.lexemes.forEach(lexeme => {
-          if (lexeme[subArr1][subArr2]) {
+          if (lexeme[subArr1] && lexeme[subArr1][subArr2]) {
             lexeme[subArr1][subArr2].forEach(def => {
               if (dictsList.indexOf(def.dict) === -1) {
                 dictsList.push(def.dict)
@@ -32467,10 +32652,10 @@ class CheckTable {
           let row = []
           row.push(targetWord)
           row.push(langCode)
-          row.push(lexeme.shortDefData.lexClient ? 'yes' : 'no')
+          row.push(lexeme.shortDefData && lexeme.shortDefData.lexClient ? 'yes' : 'no')
           row.push(lexeme.lemmaWord)
 
-          if (lexeme.shortDefData.shortDefs) {
+          if (lexeme.shortDefData && lexeme.shortDefData.shortDefs) {
             dictsList.forEach(dict => {
               let dictValue = []
               lexeme.shortDefData.shortDefs.forEach(def => {
@@ -32478,8 +32663,8 @@ class CheckTable {
               })
               row.push(dictValue.length > 0 ? dictValue.map((item, index) => (dictValue.length > 1 ? (index + 1) + '. ' : '') + item).join(';\r\n') : null)
             })
+            table.push(row)
           }
-          table.push(row)
         })
       } else {
         let row = []
@@ -32529,7 +32714,7 @@ class CheckTable {
     this.fullDefData = dictsTables
   }
 
-  createFailedWordsDownload () {
+  createFailedAnythingDownload () {
     let table = []
     let header = ['TargetWord', 'Language', 'MorphClient', 'LemmaWord', 'ShortLexical', 'FullLexical']
     table.push(header)
@@ -32549,15 +32734,19 @@ class CheckTable {
           let shortDefsResult = []
           let fullDefsResult = []
 
-          if (lexeme.shortDefData.shortDefs) {
+          if ((lexeme.shortDefData && lexeme.shortDefData.shortDefs) || (lexeme.fullDefData && lexeme.fullDefData.fullDefs)) {
             dictsListShort.forEach(dict => {
               let dictValue = []
-              lexeme.shortDefData.shortDefs.forEach(def => {
-                if (def.dict === dict && !def.text) { shortDefsResult.push(dict + ' - no') }
-              })
-              lexeme.fullDefData.fullDefs.forEach(def => {
-                if (def.dict === dict && !def.text) { fullDefsResult.push(dict + ' - no') }
-              })
+              if (lexeme.shortDefData && lexeme.shortDefData.shortDefs) {
+                lexeme.shortDefData.shortDefs.forEach(def => {
+                  if (def.dict === dict && !def.text) { shortDefsResult.push(dict + ' - no') }
+                })
+              }
+              if (lexeme.fullDefData && lexeme.fullDefData.fullDefs) {
+                lexeme.fullDefData.fullDefs.forEach(def => {
+                  if (def.dict === dict && !def.text) { fullDefsResult.push(dict + ' - no') }
+                })
+              }
             })
           }
 
@@ -32568,7 +32757,7 @@ class CheckTable {
       }
     })
 
-    this.failedWords = table
+    this.failedAnything = table
   }
 
   createFailedMorphDownload () {
@@ -32590,6 +32779,39 @@ class CheckTable {
   }
 
   createTranslationsDataDownload () {
+    let table = []
+
+    if (this.data[0].langs && this.data[0].langs.length > 0) {
+      let langs = this.data[0].langs.map(lang => lang.property)
+
+      let header = ['TargetWord', 'Language', 'Lemma', ...langs]
+
+      table.push(header)
+
+      this.data.forEach(homonym => {
+        let targetWord = homonym.targetWord
+        let langCode = homonym.languageName
+
+        if (homonym.lexemes) {
+          homonym.lexemes.forEach(lexeme => {
+            let langsData = []
+            let lemma = lexeme.lemmaWord
+            for (let lang of langs) {
+              if (lexeme.translations[lang].glosses) {
+                langsData.push(lexeme.translations[lang].glosses.join('; '))
+              }
+            }
+            table.push([targetWord, langCode, lemma, ...langsData])
+          })
+        }
+      })
+    } else {
+      table.push(['TargetWord', 'Language', 'Lemma'])
+    }
+    this.translationsData = table
+  }
+
+  createFailedTranslationsDownload () {
     let langs = this.data[0].langs.map(lang => lang.property)
 
     let table = []
@@ -32606,15 +32828,115 @@ class CheckTable {
           let langsData = []
           let lemma = lexeme.lemmaWord
           for (let lang of langs) {
-            if (lexeme.translations[lang].glosses) {
-              langsData.push(lexeme.translations[lang].glosses.join('; '))
+            if (!lexeme.translations[lang].glosses) {
+              langsData.push('no')
+            } else {
+              langsData.push(null)
             }
           }
-          table.push([targetWord, langCode, lemma, ...langsData])
+          if (langsData.filter(val => val === 'no').length > 0) {
+            table.push([targetWord, langCode, lemma, ...langsData])
+          }
         })
       }
     })
-    this.translationsData = table
+    this.failedTranslations = table
+  }
+
+  createFailedShortDefDownload () {
+    let table = []
+
+    let dictsList = this.getDictsList('shortDefData', 'shortDefs')
+
+    let header = ['TargetWord', 'Language', 'LexClient', 'LemmaWord']
+    header = header.concat(dictsList)
+    table.push(header)
+
+    this.data.forEach(homonym => {
+      let targetWord = homonym.targetWord
+      let langCode = homonym.languageName
+
+      if (homonym.lexemes) {
+        homonym.lexemes.forEach(lexeme => {
+          let row = []
+          row.push(targetWord)
+          row.push(langCode)
+          row.push(lexeme.shortDefData && lexeme.shortDefData.lexClient ? 'yes' : 'no')
+          row.push(lexeme.lemmaWord)
+
+          if (lexeme.shortDefData && lexeme.shortDefData.shortDefs) {
+            dictsList.forEach(dict => {
+              let dictValue = []
+              lexeme.shortDefData.shortDefs.forEach(def => {
+                if (def.dict === dict && !def.text) { dictValue.push('no') }
+              })
+              if (dictValue.length > 0) {
+                row.push(dictValue.length > 0 ? dictValue.map((item, index) => (dictValue.length > 1 ? (index + 1) + '. ' : '') + item).join(';\r\n') : null)
+              }
+            })
+          }
+          if (row.length > 4) {
+            table.push(row)
+          }
+        })
+      } else {
+        let row = []
+        row.push(targetWord)
+        row.push(langCode)
+        row.push('no')
+        table.push(row)
+      }
+    })
+
+    this.failedShortDef = table
+  }
+
+  createFailedFullDefDownload () {
+    let table = []
+
+    let dictsList = this.getDictsList('fullDefData', 'fullDefs')
+
+    let header = ['TargetWord', 'Language', 'LexClient', 'LemmaWord']
+    header = header.concat(dictsList)
+    table.push(header)
+
+    this.data.forEach(homonym => {
+      let targetWord = homonym.targetWord
+      let langCode = homonym.languageName
+
+      if (homonym.lexemes) {
+        homonym.lexemes.forEach(lexeme => {
+          let row = []
+          row.push(targetWord)
+          row.push(langCode)
+          row.push(lexeme.fullDefData && lexeme.fullDefData.lexClient ? 'yes' : 'no')
+          row.push(lexeme.lemmaWord)
+
+          if (lexeme.fullDefData && lexeme.fullDefData.shortDefs) {
+            dictsList.forEach(dict => {
+              let dictValue = []
+              lexeme.fullDefData.shortDefs.forEach(def => {
+                if (def.dict === dict && !def.text) { dictValue.push('no') }
+              })
+              if (dictValue.length > 0) {
+                row.push(dictValue.map((item, index) => (dictValue.length > 1 ? (index + 1) + '. ' : '') + item).join(';\r\n'))
+              }
+            })
+          }
+          if (row.length > 4) {
+            table.push(row)
+          }
+        })
+      } else {
+        let row = []
+        row.push(targetWord)
+        row.push(langCode)
+        row.push('no')
+        table.push(row)
+      }
+    })
+
+    this.failedFullDef = table
   }
 }
 
@@ -32655,15 +32977,14 @@ __webpack_require__.r(__webpack_exports__);
 const csvParser = __webpack_require__(/*! papaparse */ "../node_modules/papaparse/papaparse.js")
 
 class DataController {
-  constructor (dataFile = 'data.json', configFile = 'libraryConfig.json') {
-    this.dataFile = dataFile
+  constructor (configFile = 'libraryConfig.json', tabDelimiter = '\t') {
     this.configFile = configFile
     this.resultData = new _lib_check_table_js__WEBPACK_IMPORTED_MODULE_5__["default"]()
+    this.tabDelimiter = tabDelimiter
   }
 
   async initVue () {
     await this.loadConfigData()
-    // await this.loadSourceData()
     this.createVueApp()
   }
 
@@ -32692,17 +33013,6 @@ class DataController {
     return langRes
   }
 
-  async loadSourceData () {
-    if (this.dataFile) {
-      try {
-        let sourceData = await _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].getFileContents(this.dataFile)
-        this.prepareSourceData(sourceData)
-      } catch (err) {
-        console.error('Some problems with loading source data', err.message)
-      }
-    }
-  }
-
   prepareSourceData (sourceData) {
     sourceData.forEach(dataItem => {
       dataItem.languageID = this.languages[dataItem.languageCode].const
@@ -32715,13 +33025,15 @@ class DataController {
   }
 
   prepareLexicalConfigs (defOpts, languageCode) {
-    if (!defOpts.codes) { defOpts.codes = [] }
-    if (defOpts.codes.length === 0) {
-      defOpts.codes = Object.keys(this.dictionaries).filter(key => this.dictionaries[key].languageCode === languageCode)
-    }
+    if (defOpts) {
+      if (!defOpts.codes) { defOpts.codes = [] }
+      if (defOpts.codes.length === 0) {
+        defOpts.codes = Object.keys(this.dictionaries).filter(key => this.dictionaries[key].languageCode === languageCode)
+      }
 
-    defOpts.allow = defOpts.codes.map(code => this.dictionaries[code].url)
-    defOpts.dicts = defOpts.codes.map(code => `${code} (${this.dictionaries[code].name})`)
+      defOpts.allow = defOpts.codes.map(code => this.dictionaries[code].url)
+      defOpts.dicts = defOpts.codes.map(code => `${code} (${this.dictionaries[code].name})`)
+    }
   }
 
   static getPrintData () {
@@ -32735,7 +33047,7 @@ class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: ';'}), printDt + '-morphData.csv')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: this.tabDelimiter}), printDt + '-morphData.csv')
   }
 
   downloadShortDef () {
@@ -32744,7 +33056,7 @@ class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.shortDefData, {delimiter: ';'}), printDt + '-shortDefData.csv')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.shortDefData, {delimiter: this.tabDelimiter}), printDt + '-shortDefData.csv')
   }
 
   downloadFullDef () {
@@ -32759,13 +33071,13 @@ class DataController {
     }
   }
 
-  downloadFailedWords () {
-    if (!this.resultData.failedWords) {
-      this.resultData.createFailedWordsDownload()
+  downloadTranslations () {
+    if (!this.resultData.translationsData) {
+      this.resultData.createTranslationsDataDownload()
     }
 
     let printDt = DataController.getPrintData()
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: ';'}), printDt + '-failedWords.csv')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: this.tabDelimiter}), printDt + '-translationsData.csv')
   }
 
   downloadFailedMorph () {
@@ -32774,16 +33086,43 @@ class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: ';'}), printDt + '-failedMorph.csv')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: this.tabDelimiter}), printDt + '-failedMorph.csv')
   }
 
-  downloadTranslationsClient () {
-    if (!this.resultData.translationsData) {
-      this.resultData.createTranslationsDataDownload()
+  downloadFailedShortDef () {
+    if (!this.resultData.failedShortDef) {
+      this.resultData.createFailedShortDefDownload()
     }
 
     let printDt = DataController.getPrintData()
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: ';'}), printDt + '-translationsData.csv')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedShortDef, {delimiter: this.tabDelimiter}), printDt + '-failedShortDef.csv')
+  }
+
+  downloadFailedFullDef () {
+    if (!this.resultData.failedFullDef) {
+      this.resultData.createFailedFullDefDownload()
+    }
+
+    let printDt = DataController.getPrintData()
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedFullDef, {delimiter: this.tabDelimiter}), printDt + '-failedFullDef.csv')
+  }
+
+  downloadFailedTranslations () {
+    if (!this.resultData.failedTranslations) {
+      this.resultData.createFailedTranslationsDownload()
+    }
+
+    let printDt = DataController.getPrintData()
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedTranslations, {delimiter: this.tabDelimiter}), printDt + '-failedTranslations.csv')
+  }
+
+  downloadFailedAnything () {
+    if (!this.resultData.failedAnything) {
+      this.resultData.createFailedAnythingDownload()
+    }
+
+    let printDt = DataController.getPrintData()
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedAnything, {delimiter: this.tabDelimiter}), printDt + '-failedAnything.csv')
   }
 
   createVueApp () {
@@ -32811,18 +33150,30 @@ class DataController {
         downloadfulldef () {
           dataController.downloadFullDef()
         },
-        downloadfailedwords () {
-          dataController.downloadFailedWords()
+        downloadtranslations () {
+          dataController.downloadTranslations()
         },
+
         downloadfailedmorph () {
           dataController.downloadFailedMorph()
         },
-        downloadtranslationsclient () {
-          dataController.downloadTranslationsClient()
+
+        downloadfailedshortdef () {
+          dataController.downloadFailedShortDef()
         },
-        getdata (sourceData, langs) {
+        downloadfailedfulldef () {
+          dataController.downloadFailedFullDef()
+        },
+        downloadfailedtranslations () {
+          dataController.downloadFailedTranslations()
+        },
+        downloadfailedanything () {
+          dataController.downloadFailedAnything()
+        },
+
+        getdata (sourceData, langs, skipShortDefs, skipFullDefs) {
           dataController.prepareSourceData(sourceData)
-          dataController.resultData.getData(dataController, langs)
+          dataController.resultData.getData(dataController, langs, skipShortDefs, skipFullDefs)
         },
         clearresulttable () {
           dataController.resultData.clear(dataController)
@@ -33035,7 +33386,7 @@ class LexicalQuery {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\r\n\t<resultgrid \r\n\t\t:resulttable = \"resulttable\" \r\n\t\t:tableready = \"tableready\"\r\n\t\t:translationlangs = \"translationlangs\"\r\n\t\t@downloadmorph = \"downloadmorph\"\r\n\t\t@downloadshortdef = \"downloadshortdef\"\r\n\t\t@downloadfulldef = \"downloadfulldef\"\r\n\t\t@downloadfailedmorph = \"downloadfailedmorph\"\r\n\t\t@downloadfailedwords = \"downloadfailedwords\"\r\n\t\t@downloadtranslationsclient = \"downloadtranslationsclient\"\r\n\t\t@getdata = \"getdata\"\r\n\t\t@clearresulttable = \"clearresulttable\"\r\n\t></resultgrid>\r\n</div>";
+module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\r\n\t<resultgrid \r\n\t\t:resulttable = \"resulttable\" \r\n\t\t:tableready = \"tableready\"\r\n\t\t:translationlangs = \"translationlangs\"\r\n\t\t@downloadmorph = \"downloadmorph\"\r\n\t\t@downloadshortdef = \"downloadshortdef\"\r\n\t\t@downloadfulldef = \"downloadfulldef\"\r\n\t\t@downloadtranslations = \"downloadtranslations\"\r\n\r\n\t\t@downloadfailedmorph = \"downloadfailedmorph\"\r\n\t\t@downloadfailedshortdef = \"downloadfailedshortdef\"\r\n\t\t@downloadfailedfulldef = \"downloadfailedfulldef\"\r\n\t\t@downloadfailedtranslations = \"downloadfailedtranslations\"\r\n\t\t@downloadfailedanything = \"downloadfailedanything\"\r\n\t\t\r\n\t\t@getdata = \"getdata\"\r\n\t\t@clearresulttable = \"clearresulttable\"\r\n\t></resultgrid>\r\n</div>";
 
 /***/ }),
 

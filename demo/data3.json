@@ -9,7 +9,7 @@
 		"targetWord": "μοῦσα",
         "languageCode": "grc",
         "lexiconShortOpts": { "codes": ["lsj"] },
-        "lexiconFullOpts": { "codes": ["lsj"] }
+        "lexiconFullOpts": false
 	},
 	{
 		"targetWord": "mare",
@@ -20,7 +20,7 @@
 	{
 		"targetWord": "συνδέει",
         "languageCode": "grc",
-        "lexiconShortOpts": { "codes": ["lsj", "aut"] },
+        "lexiconShortOpts": false,
         "lexiconFullOpts": { "codes": [] }
 	},
 	{
