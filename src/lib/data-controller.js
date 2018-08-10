@@ -13,15 +13,14 @@ import CheckTable from '@/lib/check-table.js'
 const csvParser = require('papaparse')
 
 export default class DataController {
-  constructor (dataFile = 'data.json', configFile = 'libraryConfig.json') {
-    this.dataFile = dataFile
+  constructor (configFile = 'libraryConfig.json', tabDelimiter = '\t') {
     this.configFile = configFile
     this.resultData = new CheckTable()
+    this.tabDelimiter = tabDelimiter
   }
 
   async initVue () {
     await this.loadConfigData()
-    // await this.loadSourceData()
     this.createVueApp()
   }
 
@@ -48,17 +47,6 @@ export default class DataController {
       }
     }
     return langRes
-  }
-
-  async loadSourceData () {
-    if (this.dataFile) {
-      try {
-        let sourceData = await FileController.getFileContents(this.dataFile)
-        this.prepareSourceData(sourceData)
-      } catch (err) {
-        console.error('Some problems with loading source data', err.message)
-      }
-    }
   }
 
   prepareSourceData (sourceData) {
@@ -93,7 +81,7 @@ export default class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: ';'}), printDt + '-morphData.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: this.tabDelimiter}), printDt + '-morphData.csv')
   }
 
   downloadShortDef () {
@@ -102,7 +90,7 @@ export default class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.shortDefData, {delimiter: ';'}), printDt + '-shortDefData.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.shortDefData, {delimiter: this.tabDelimiter}), printDt + '-shortDefData.csv')
   }
 
   downloadFullDef () {
@@ -123,7 +111,7 @@ export default class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: ';'}), printDt + '-failedWords.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: this.tabDelimiter}), printDt + '-failedWords.csv')
   }
 
   downloadFailedMorph () {
@@ -132,7 +120,7 @@ export default class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: ';'}), printDt + '-failedMorph.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: this.tabDelimiter}), printDt + '-failedMorph.csv')
   }
 
   downloadTranslationsClient () {
@@ -141,7 +129,7 @@ export default class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: ';'}), printDt + '-translationsData.csv')
+    FileController.saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: this.tabDelimiter}), printDt + '-translationsData.csv')
   }
 
   createVueApp () {

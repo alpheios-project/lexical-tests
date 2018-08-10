@@ -32225,9 +32225,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Embedded {
-  constructor () {
+  constructor (configFile, tabDelimiter) {
     this.resultsId = 'alpheios-tests-results'
-    this.dataController = new _lib_data_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"]()
+    this.dataController = new _lib_data_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"](configFile, tabDelimiter)
     this.dataController.initVue()
   }
 }
@@ -32655,15 +32655,14 @@ __webpack_require__.r(__webpack_exports__);
 const csvParser = __webpack_require__(/*! papaparse */ "../node_modules/papaparse/papaparse.js")
 
 class DataController {
-  constructor (dataFile = 'data.json', configFile = 'libraryConfig.json') {
-    this.dataFile = dataFile
+  constructor (configFile = 'libraryConfig.json', tabDelimiter = '\t') {
     this.configFile = configFile
     this.resultData = new _lib_check_table_js__WEBPACK_IMPORTED_MODULE_5__["default"]()
+    this.tabDelimiter = tabDelimiter
   }
 
   async initVue () {
     await this.loadConfigData()
-    // await this.loadSourceData()
     this.createVueApp()
   }
 
@@ -32690,17 +32689,6 @@ class DataController {
       }
     }
     return langRes
-  }
-
-  async loadSourceData () {
-    if (this.dataFile) {
-      try {
-        let sourceData = await _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].getFileContents(this.dataFile)
-        this.prepareSourceData(sourceData)
-      } catch (err) {
-        console.error('Some problems with loading source data', err.message)
-      }
-    }
   }
 
   prepareSourceData (sourceData) {
@@ -32735,7 +32723,7 @@ class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: ';'}), printDt + '-morphData.csv')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: this.tabDelimiter}), printDt + '-morphData.csv')
   }
 
   downloadShortDef () {
@@ -32744,7 +32732,7 @@ class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.shortDefData, {delimiter: ';'}), printDt + '-shortDefData.csv')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.shortDefData, {delimiter: this.tabDelimiter}), printDt + '-shortDefData.csv')
   }
 
   downloadFullDef () {
@@ -32765,7 +32753,7 @@ class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: ';'}), printDt + '-failedWords.csv')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedWords, {delimiter: this.tabDelimiter}), printDt + '-failedWords.csv')
   }
 
   downloadFailedMorph () {
@@ -32774,7 +32762,7 @@ class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: ';'}), printDt + '-failedMorph.csv')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: this.tabDelimiter}), printDt + '-failedMorph.csv')
   }
 
   downloadTranslationsClient () {
@@ -32783,7 +32771,7 @@ class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: ';'}), printDt + '-translationsData.csv')
+    _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: this.tabDelimiter}), printDt + '-translationsData.csv')
   }
 
   createVueApp () {
