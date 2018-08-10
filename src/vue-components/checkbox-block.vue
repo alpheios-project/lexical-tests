@@ -1,6 +1,6 @@
 <template>
-	<label class="alpheios-checkbox_container">{{ label }}
-		<input type="checkbox" v-model="inputVal">
+	<label class="alpheios-checkbox_container" :class="{'alpheious_disabled_input': disabledInput}">{{ label }}
+		<input :disabled="disabledInput" type="checkbox" v-model="inputVal">
 		<span class="alpheios-checkbox_checkmark"></span>
 	</label>
 </template>
@@ -22,6 +22,11 @@
         type: String,
         required: false,
         default: ''
+      },
+      disabledInput: {
+        type: Boolean,
+        required: false,
+        default: false
       }
     },
     data() {
@@ -67,6 +72,15 @@
 /* On mouse-over, add a grey background color */
 .alpheios-checkbox_container:hover input ~ .alpheios-checkbox_checkmark {
   background-color: #ccc;
+}
+
+.alpheious_disabled_input.alpheios-checkbox_container:hover input ~ .alpheios-checkbox_checkmark,
+.alpheious_disabled_input .alpheios-checkbox_checkmark {
+  background-color: #f9f9f9;
+}
+
+.alpheious_disabled_input {
+  color: #f9f9f9;
 }
 
 /* When the checkbox is checked, add a blue background */

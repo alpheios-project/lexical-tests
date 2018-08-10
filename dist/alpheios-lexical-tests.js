@@ -20144,6 +20144,11 @@ __webpack_require__.r(__webpack_exports__);
       type: String,
       required: false,
       default: ''
+    },
+    disabledInput: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   data() {
@@ -20169,6 +20174,16 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _vue_components_checkbox_block_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/vue-components/checkbox-block.vue */ "./vue-components/checkbox-block.vue");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -20329,7 +20344,9 @@ __webpack_require__.r(__webpack_exports__);
           failedFullDef: false,
           failedTranslations: false,
           failedAnything: false,
-          
+
+          skipShortDefs: false,
+          skipFullDefs: false
         },
         langs: [],
         uploadError: null
@@ -20352,6 +20369,19 @@ __webpack_require__.r(__webpack_exports__);
         let downloads = Object.keys(this.checkboxes).filter(key => this.checkboxes[key] && !this.langs.map(lang => lang.property).includes(key))
 
         return this.tableready && (downloads.length > 0)
+      },
+      skipTranslations () {
+        if (this.resulttable.length === 0) {
+          return false
+        }
+        console.info('********************this.resulttable[0].langs', this.resulttable)
+        return !this.resulttable[0].langs ? true : false
+      },
+      skipShortDefs () {
+        return this.resulttable.length > 0 ? this.resulttable[0].skipShortDefs : false
+      },
+      skipFullDefs () {
+        return this.resulttable.length > 0 ? this.resulttable[0].skipFullDefs : false
       }
     },
     watch: {
@@ -20530,7 +20560,7 @@ __webpack_require__.r(__webpack_exports__);
           let langsProps = Object.keys(this.checkboxes).filter(key => this.checkboxes[key] && this.langs.map(lang => lang.property).includes(key))
 
           let langs = this.langs.filter(lang => langsProps.includes(lang.property))
-          this.$emit('getdata', this.sourceData, langs)
+          this.$emit('getdata', this.sourceData, langs, this.checkboxes.skipShortDefs, this.checkboxes.skipFullDefs)
         }
       }
     }
@@ -20554,46 +20584,53 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("label", { staticClass: "alpheios-checkbox_container" }, [
-    _vm._v(_vm._s(_vm.label) + "\n\t"),
-    _c("input", {
-      directives: [
-        {
-          name: "model",
-          rawName: "v-model",
-          value: _vm.inputVal,
-          expression: "inputVal"
-        }
-      ],
-      attrs: { type: "checkbox" },
-      domProps: {
-        checked: Array.isArray(_vm.inputVal)
-          ? _vm._i(_vm.inputVal, null) > -1
-          : _vm.inputVal
-      },
-      on: {
-        change: function($event) {
-          var $$a = _vm.inputVal,
-            $$el = $event.target,
-            $$c = $$el.checked ? true : false
-          if (Array.isArray($$a)) {
-            var $$v = null,
-              $$i = _vm._i($$a, $$v)
-            if ($$el.checked) {
-              $$i < 0 && (_vm.inputVal = $$a.concat([$$v]))
+  return _c(
+    "label",
+    {
+      staticClass: "alpheios-checkbox_container",
+      class: { alpheious_disabled_input: _vm.disabledInput }
+    },
+    [
+      _vm._v(_vm._s(_vm.label) + "\n\t"),
+      _c("input", {
+        directives: [
+          {
+            name: "model",
+            rawName: "v-model",
+            value: _vm.inputVal,
+            expression: "inputVal"
+          }
+        ],
+        attrs: { disabled: _vm.disabledInput, type: "checkbox" },
+        domProps: {
+          checked: Array.isArray(_vm.inputVal)
+            ? _vm._i(_vm.inputVal, null) > -1
+            : _vm.inputVal
+        },
+        on: {
+          change: function($event) {
+            var $$a = _vm.inputVal,
+              $$el = $event.target,
+              $$c = $$el.checked ? true : false
+            if (Array.isArray($$a)) {
+              var $$v = null,
+                $$i = _vm._i($$a, $$v)
+              if ($$el.checked) {
+                $$i < 0 && (_vm.inputVal = $$a.concat([$$v]))
+              } else {
+                $$i > -1 &&
+                  (_vm.inputVal = $$a.slice(0, $$i).concat($$a.slice($$i + 1)))
+              }
             } else {
-              $$i > -1 &&
-                (_vm.inputVal = $$a.slice(0, $$i).concat($$a.slice($$i + 1)))
+              _vm.inputVal = $$c
             }
-          } else {
-            _vm.inputVal = $$c
           }
         }
-      }
-    }),
-    _vm._v(" "),
-    _c("span", { staticClass: "alpheios-checkbox_checkmark" })
-  ])
+      }),
+      _vm._v(" "),
+      _c("span", { staticClass: "alpheios-checkbox_checkmark" })
+    ]
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -20624,7 +20661,7 @@ var render = function() {
         ])
       : _vm._e(),
     _vm._v(" "),
-    _c("div", { staticClass: "alpheios-result-grid__file_block" }, [
+    _c("div", { staticClass: "alpheios-result-grid__file_block block1" }, [
       _c("label", [
         _c("input", {
           ref: "sourcefile",
@@ -20643,8 +20680,10 @@ var render = function() {
         ? _c("p", { staticClass: "alpheios-result-grid__file_name" }, [
             _vm._v(_vm._s(_vm.file.name) + ", " + _vm._s(_vm.fileSize) + "Kb")
           ])
-        : _vm._e(),
-      _vm._v(" "),
+        : _vm._e()
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "alpheios-result-grid__file_block block2" }, [
       _c(
         "button",
         {
@@ -20664,6 +20703,42 @@ var render = function() {
             _vm._v("Words - " + _vm._s(_vm.sourceData.length))
           ])
         : _vm._e()
+    ]),
+    _vm._v(" "),
+    _c("ul", { staticClass: "alpheios-result-grid__list_checkboxes" }, [
+      _c("li", { staticClass: "alpheios-result-grid__list_label" }, [
+        _vm._v("Skip checks:")
+      ]),
+      _vm._v(" "),
+      _c(
+        "li",
+        [
+          _c("checkbox-block", {
+            attrs: {
+              label: "Short defs",
+              value: _vm.checkboxes.skipShortDefs,
+              property: "skipShortDefs"
+            },
+            on: { input: _vm.updateProperty }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "li",
+        [
+          _c("checkbox-block", {
+            attrs: {
+              label: "Full defs",
+              value: _vm.checkboxes.skipFullDefs,
+              property: "skipFullDefs"
+            },
+            on: { input: _vm.updateProperty }
+          })
+        ],
+        1
+      )
     ]),
     _vm._v(" "),
     _vm.langs.length > 0
@@ -20735,6 +20810,7 @@ var render = function() {
             [
               _c("checkbox-block", {
                 attrs: {
+                  disabledInput: _vm.skipShortDefs,
                   label: "Short Def",
                   value: _vm.checkboxes.shortDef,
                   property: "shortDef"
@@ -20750,6 +20826,7 @@ var render = function() {
             [
               _c("checkbox-block", {
                 attrs: {
+                  disabledInput: _vm.skipFullDefs,
                   label: "Full Def",
                   value: _vm.checkboxes.fullDef,
                   property: "fullDef"
@@ -20766,6 +20843,7 @@ var render = function() {
               _vm.langs.length > 0
                 ? _c("checkbox-block", {
                     attrs: {
+                      disabledInput: _vm.skipTranslations,
                       label: "Translations",
                       value: _vm.checkboxes.translations,
                       property: "translations"
@@ -20801,6 +20879,7 @@ var render = function() {
             [
               _c("checkbox-block", {
                 attrs: {
+                  disabledInput: _vm.skipShortDefs,
                   label: "Failed Short Def",
                   value: _vm.checkboxes.failedShortDef,
                   property: "failedShortDef"
@@ -20816,6 +20895,7 @@ var render = function() {
             [
               _c("checkbox-block", {
                 attrs: {
+                  disabledInput: _vm.skipFullDefs,
                   label: "Failed Full Def",
                   value: _vm.checkboxes.failedFullDef,
                   property: "failedFullDef"
@@ -20831,6 +20911,7 @@ var render = function() {
             [
               _c("checkbox-block", {
                 attrs: {
+                  disabledInput: _vm.skipTranslations,
                   label: "Failed Translations",
                   value: _vm.checkboxes.failedTranslations,
                   property: "failedTranslations"
@@ -20912,7 +20993,7 @@ var render = function() {
                 _c("td", [
                   _vm._v(
                     _vm._s(
-                      homonym.lexiconShortOpts
+                      !_vm.skipShortDefs && homonym.lexiconShortOpts
                         ? homonym.lexiconShortOpts.dicts.join("; ")
                         : "no"
                     )
@@ -20922,7 +21003,7 @@ var render = function() {
                 _c("td", [
                   _vm._v(
                     _vm._s(
-                      homonym.lexiconFullOpts
+                      !_vm.skipFullDefs && homonym.lexiconFullOpts
                         ? homonym.lexiconFullOpts.dicts.join("; ")
                         : "no"
                     )
@@ -32370,7 +32451,7 @@ class CheckTable {
     vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', null)
   }
 
-  async getData (dataController, langs = []) {
+  async getData (dataController, langs = [], skipShortDefs = false, skipFullDefs = false) {
     vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', false)
 
     let sourceData = dataController.sourceData
@@ -32378,16 +32459,16 @@ class CheckTable {
       let sourceItem = sourceData[i]
       let lexQuery = new _lib_lexical_query_js__WEBPACK_IMPORTED_MODULE_0__["default"](sourceItem)
 
-      let homonymData = await this.getMorphData(lexQuery)
+      let homonymData = await this.getMorphData(lexQuery, langs, skipShortDefs, skipFullDefs)
       this.data.push(homonymData)
 
       if (lexQuery.homonym && lexQuery.homonym.lexemes) {
         lexQuery.homonym.lexemes.forEach(lex => { lex.meaning.shortDefs = [] })
 
-        if (lexQuery.lexiconShortOpts) {
+        if (lexQuery.lexiconShortOpts && !skipShortDefs) {
           await this.getShortDefsData(lexQuery, homonymData)
         }
-        if (lexQuery.lexiconFullOpts) {
+        if (lexQuery.lexiconFullOpts && !skipFullDefs) {
           await this.getFullDefsData(lexQuery, homonymData)
         }
 
@@ -32401,13 +32482,17 @@ class CheckTable {
     vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', true)
   }
 
-  async getMorphData (lexQuery) {
+  async getMorphData (lexQuery, langs, skipShortDefs, skipFullDefs) {
     let homonymData = {
       targetWord: lexQuery.targetWord,
       languageID: lexQuery.languageID,
       languageName: lexQuery.languageName,
       lexiconShortOpts: lexQuery.lexiconShortOpts,
       lexiconFullOpts: lexQuery.lexiconFullOpts,
+
+      skipShortDefs: skipShortDefs,
+      skipFullDefs: skipFullDefs,
+      langs: langs,
 
       morphClient: false
     }
@@ -32461,7 +32546,6 @@ class CheckTable {
   }
 
   async getLemmaTranslations (lexQuery, homonymData, langs) {
-    homonymData.langs = langs
     await lexQuery.getLemmaTranslations(langs)
 
     lexQuery.homonym.lexemes.forEach((lexeme, index) => {
@@ -32963,7 +33047,6 @@ class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    console.info('*******************downloadMorph', JSON.stringify(this.tabDelimiter), this.resultData.morphData)
     _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"].saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: this.tabDelimiter}), printDt + '-morphData.csv')
   }
 
@@ -33088,9 +33171,9 @@ class DataController {
           dataController.downloadFailedAnything()
         },
 
-        getdata (sourceData, langs) {
+        getdata (sourceData, langs, skipShortDefs, skipFullDefs) {
           dataController.prepareSourceData(sourceData)
-          dataController.resultData.getData(dataController, langs)
+          dataController.resultData.getData(dataController, langs, skipShortDefs, skipFullDefs)
         },
         clearresulttable () {
           dataController.resultData.clear(dataController)

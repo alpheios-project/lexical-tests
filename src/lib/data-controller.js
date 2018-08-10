@@ -83,7 +83,6 @@ export default class DataController {
     }
 
     let printDt = DataController.getPrintData()
-    console.info('*******************downloadMorph', JSON.stringify(this.tabDelimiter), this.resultData.morphData)
     FileController.saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: this.tabDelimiter}), printDt + '-morphData.csv')
   }
 
@@ -208,9 +207,9 @@ export default class DataController {
           dataController.downloadFailedAnything()
         },
 
-        getdata (sourceData, langs) {
+        getdata (sourceData, langs, skipShortDefs, skipFullDefs) {
           dataController.prepareSourceData(sourceData)
-          dataController.resultData.getData(dataController, langs)
+          dataController.resultData.getData(dataController, langs, skipShortDefs, skipFullDefs)
         },
         clearresulttable () {
           dataController.resultData.clear(dataController)

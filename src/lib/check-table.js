@@ -21,7 +21,7 @@ export default class CheckTable {
     Vue.set(dataController.vueApp, 'tableready', null)
   }
 
-  async getData (dataController, langs = []) {
+  async getData (dataController, langs = [], skipShortDefs = false, skipFullDefs = false) {
     Vue.set(dataController.vueApp, 'tableready', false)
 
     let sourceData = dataController.sourceData
@@ -29,16 +29,16 @@ export default class CheckTable {
       let sourceItem = sourceData[i]
       let lexQuery = new LexicalQuery(sourceItem)
 
-      let homonymData = await this.getMorphData(lexQuery)
+      let homonymData = await this.getMorphData(lexQuery, langs, skipShortDefs, skipFullDefs)
       this.data.push(homonymData)
 
       if (lexQuery.homonym && lexQuery.homonym.lexemes) {
         lexQuery.homonym.lexemes.forEach(lex => { lex.meaning.shortDefs = [] })
 
-        if (lexQuery.lexiconShortOpts) {
+        if (lexQuery.lexiconShortOpts && !skipShortDefs) {
           await this.getShortDefsData(lexQuery, homonymData)
         }
-        if (lexQuery.lexiconFullOpts) {
+        if (lexQuery.lexiconFullOpts && !skipFullDefs) {
           await this.getFullDefsData(lexQuery, homonymData)
         }
 
@@ -52,13 +52,17 @@ export default class CheckTable {
     Vue.set(dataController.vueApp, 'tableready', true)
   }
 
-  async getMorphData (lexQuery) {
+  async getMorphData (lexQuery, langs, skipShortDefs, skipFullDefs) {
     let homonymData = {
       targetWord: lexQuery.targetWord,
       languageID: lexQuery.languageID,
       languageName: lexQuery.languageName,
       lexiconShortOpts: lexQuery.lexiconShortOpts,
       lexiconFullOpts: lexQuery.lexiconFullOpts,
+
+      skipShortDefs: skipShortDefs,
+      skipFullDefs: skipFullDefs,
+      langs: langs,
 
       morphClient: false
     }
@@ -112,7 +116,6 @@ export default class CheckTable {
   }
 
   async getLemmaTranslations (lexQuery, homonymData, langs) {
-    homonymData.langs = langs
     await lexQuery.getLemmaTranslations(langs)
 
     lexQuery.homonym.lexemes.forEach((lexeme, index) => {
