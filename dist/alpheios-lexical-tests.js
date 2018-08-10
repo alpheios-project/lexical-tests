@@ -4649,17 +4649,32 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
 /******/ 		}
 /******/ 	};
 /******/
 /******/ 	// define __esModule on exports
 /******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
 /******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
 /******/ 	};
 /******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
@@ -5925,7 +5940,7 @@ module.exports = g;
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _config_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./config.json */ "./alpheios/config.json");
-var _config_json__WEBPACK_IMPORTED_MODULE_0___namespace = /*#__PURE__*/Object.assign({}, _config_json__WEBPACK_IMPORTED_MODULE_0__, {"default": _config_json__WEBPACK_IMPORTED_MODULE_0__});
+var _config_json__WEBPACK_IMPORTED_MODULE_0___namespace = /*#__PURE__*/__webpack_require__.t(/*! ./config.json */ "./alpheios/config.json", 1);
 /* harmony import */ var promise_polyfill__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! promise-polyfill */ "../node_modules/promise-polyfill/lib/index.js");
 /* harmony import */ var promise_polyfill__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(promise_polyfill__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var whatwg_fetch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! whatwg-fetch */ "../node_modules/whatwg-fetch/fetch.js");
@@ -6055,7 +6070,7 @@ class AlpheiosLemmaTranslationsAdapter {
 /*! exports provided: url, availableLangSource, default */
 /***/ (function(module) {
 
-module.exports = {"url":"http://localhost:5000","availableLangSource":["lat"]};
+module.exports = {"url":"https://ats.alpheios.net","availableLangSource":["lat"]};
 
 /***/ }),
 
@@ -33386,7 +33401,7 @@ class LexicalQuery {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\r\n\t<resultgrid \r\n\t\t:resulttable = \"resulttable\" \r\n\t\t:tableready = \"tableready\"\r\n\t\t:translationlangs = \"translationlangs\"\r\n\t\t@downloadmorph = \"downloadmorph\"\r\n\t\t@downloadshortdef = \"downloadshortdef\"\r\n\t\t@downloadfulldef = \"downloadfulldef\"\r\n\t\t@downloadtranslations = \"downloadtranslations\"\r\n\r\n\t\t@downloadfailedmorph = \"downloadfailedmorph\"\r\n\t\t@downloadfailedshortdef = \"downloadfailedshortdef\"\r\n\t\t@downloadfailedfulldef = \"downloadfailedfulldef\"\r\n\t\t@downloadfailedtranslations = \"downloadfailedtranslations\"\r\n\t\t@downloadfailedanything = \"downloadfailedanything\"\r\n\t\t\r\n\t\t@getdata = \"getdata\"\r\n\t\t@clearresulttable = \"clearresulttable\"\r\n\t></resultgrid>\r\n</div>";
+module.exports = "<div id=\"alpheios-lexical-status\" data-alpheios-ignore=\"all\">\n\t<resultgrid \n\t\t:resulttable = \"resulttable\" \n\t\t:tableready = \"tableready\"\n\t\t:translationlangs = \"translationlangs\"\n\t\t@downloadmorph = \"downloadmorph\"\n\t\t@downloadshortdef = \"downloadshortdef\"\n\t\t@downloadfulldef = \"downloadfulldef\"\n\t\t@downloadtranslations = \"downloadtranslations\"\n\n\t\t@downloadfailedmorph = \"downloadfailedmorph\"\n\t\t@downloadfailedshortdef = \"downloadfailedshortdef\"\n\t\t@downloadfailedfulldef = \"downloadfailedfulldef\"\n\t\t@downloadfailedtranslations = \"downloadfailedtranslations\"\n\t\t@downloadfailedanything = \"downloadfailedanything\"\n\t\t\n\t\t@getdata = \"getdata\"\n\t\t@clearresulttable = \"clearresulttable\"\n\t></resultgrid>\n</div>";
 
 /***/ }),
 
@@ -33424,7 +33439,7 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 
 /* hot reload */
 if (false) { var api; }
-component.options.__file = "vue-components\\checkbox-block.vue"
+component.options.__file = "vue-components/checkbox-block.vue"
 /* harmony default export */ __webpack_exports__["default"] = (component.exports);
 
 /***/ }),
@@ -33511,7 +33526,7 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 
 /* hot reload */
 if (false) { var api; }
-component.options.__file = "vue-components\\result-grid.vue"
+component.options.__file = "vue-components/result-grid.vue"
 /* harmony default export */ __webpack_exports__["default"] = (component.exports);
 
 /***/ }),
