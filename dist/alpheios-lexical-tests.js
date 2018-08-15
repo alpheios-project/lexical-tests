@@ -32659,7 +32659,6 @@ __webpack_require__.r(__webpack_exports__);
         if (this.resulttable.length === 0) {
           return false
         }
-        console.info('********************this.resulttable[0].langs', this.resulttable)
         return !this.resulttable[0].langs ? true : false
       },
       skipShortDefs () {
