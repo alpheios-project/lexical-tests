@@ -2,6 +2,8 @@
 /* eslint-disable no-unused-vars */
 
 import FileController from '@/lib/file-controller.js'
+import DownloadController from '@/lib/download-controller.js'
+
 import { Constants } from 'alpheios-data-models'
 
 import ResultGrid from '@/vue-components/result-grid.vue'
@@ -9,8 +11,6 @@ import Vue from 'vue/dist/vue'
 import Template from '@/templates/template.htmlf'
 
 import CheckTable from '@/lib/check-table.js'
-
-const csvParser = require('papaparse')
 
 export default class DataController {
   constructor (configFile = 'libraryConfig.json', tabDelimiter = '\t') {
@@ -72,95 +72,6 @@ export default class DataController {
     }
   }
 
-  static getPrintData () {
-    let dt = new Date()
-    return dt.toLocaleString('en-GB').replace(/\//g, '-').replace(/:/g, '-').replace(' ', '')
-  }
-
-  downloadMorph () {
-    if (!this.resultData.morphData) {
-      this.resultData.createMorphDataDownload()
-    }
-
-    let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.morphData, {delimiter: this.tabDelimiter}), printDt + '-morphData.csv')
-  }
-
-  downloadShortDef () {
-    if (!this.resultData.shortDefData) {
-      this.resultData.createShortDefDownload()
-    }
-
-    let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.shortDefData, {delimiter: this.tabDelimiter}), printDt + '-shortDefData.csv')
-  }
-
-  downloadFullDef () {
-    if (!this.resultData.fullDefData) {
-      this.resultData.createFullDefDownload()
-    }
-
-    let printDt = DataController.getPrintData()
-
-    for (let tbl in this.resultData.fullDefData) {
-      FileController.saveFile(this.resultData.fullDefData[tbl], `${printDt}-fullDefData-${tbl}.html`, 'text/html')
-    }
-  }
-
-  downloadTranslations () {
-    if (!this.resultData.translationsData) {
-      this.resultData.createTranslationsDataDownload()
-    }
-
-    let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.translationsData, {delimiter: this.tabDelimiter}), printDt + '-translationsData.csv')
-  }
-
-  downloadFailedMorph () {
-    if (!this.resultData.failedMorph) {
-      this.resultData.createFailedMorphDownload()
-    }
-
-    let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.failedMorph, {delimiter: this.tabDelimiter}), printDt + '-failedMorph.csv')
-  }
-
-  downloadFailedShortDef () {
-    if (!this.resultData.failedShortDef) {
-      this.resultData.createFailedShortDefDownload()
-    }
-
-    let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.failedShortDef, {delimiter: this.tabDelimiter}), printDt + '-failedShortDef.csv')
-  }
-
-  downloadFailedFullDef () {
-    if (!this.resultData.failedFullDef) {
-      this.resultData.createFailedFullDefDownload()
-    }
-
-    let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.failedFullDef, {delimiter: this.tabDelimiter}), printDt + '-failedFullDef.csv')
-  }
-
-  downloadFailedTranslations () {
-    if (!this.resultData.failedTranslations) {
-      this.resultData.createFailedTranslationsDownload()
-    }
-
-    let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.failedTranslations, {delimiter: this.tabDelimiter}), printDt + '-failedTranslations.csv')
-  }
-
-  downloadFailedAnything () {
-    if (!this.resultData.failedAnything) {
-      this.resultData.createFailedAnythingDownload()
-    }
-
-    let printDt = DataController.getPrintData()
-    FileController.saveFile(csvParser.unparse(this.resultData.failedAnything, {delimiter: this.tabDelimiter}), printDt + '-failedAnything.csv')
-  }
-
   createVueApp () {
     const dataController = this
     this.vueApp = new Vue({
@@ -178,39 +89,40 @@ export default class DataController {
       },
       methods: {
         downloadmorph () {
-          dataController.downloadMorph()
+          DownloadController.downloadMorph(dataController)
         },
         downloadshortdef () {
-          dataController.downloadShortDef()
+          DownloadController.downloadShortDef(dataController)
         },
         downloadfulldef () {
-          dataController.downloadFullDef()
+          DownloadController.downloadFullDef(dataController)
         },
         downloadtranslations () {
-          dataController.downloadTranslations()
+          DownloadController.downloadTranslations(dataController)
         },
 
         downloadfailedmorph () {
-          dataController.downloadFailedMorph()
+          DownloadController.downloadFailedMorph(dataController)
         },
 
         downloadfailedshortdef () {
-          dataController.downloadFailedShortDef()
+          DownloadController.downloadFailedShortDef(dataController)
         },
         downloadfailedfulldef () {
-          dataController.downloadFailedFullDef()
+          DownloadController.downloadFailedFullDef(dataController)
         },
         downloadfailedtranslations () {
-          dataController.downloadFailedTranslations()
+          DownloadController.downloadFailedTranslations(dataController)
         },
         downloadfailedanything () {
-          dataController.downloadFailedAnything()
+          DownloadController.downloadFailedAnything(dataController)
         },
 
         getdata (sourceData, langs, skipShortDefs, skipFullDefs) {
           dataController.prepareSourceData(sourceData)
           dataController.resultData.getData(dataController, langs, skipShortDefs, skipFullDefs)
         },
+
         clearresulttable () {
           dataController.resultData.clear(dataController)
         }
