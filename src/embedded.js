@@ -5,8 +5,8 @@
 import DataController from '@/lib/data-controller.js'
 
 class Embedded {
-  constructor (configFile, tabDelimiter) {
-    this.resultsId = 'alpheios-tests-results'
+  constructor (resultsId, configFile, tabDelimiter) {
+    this.resultsId = resultsId || 'alpheios-tests-results'
     this.dataController = new DataController(configFile, tabDelimiter)
     this.dataController.initVue()
   }

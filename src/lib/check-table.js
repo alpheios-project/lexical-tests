@@ -1,8 +1,11 @@
 /* eslint-env jest */
 /* eslint-disable no-unused-vars */
 
+/* eslint-env jest */
+/* eslint-disable no-unused-vars */
 import LexicalQuery from '@/lib/lexical-query.js'
 import Vue from 'vue/dist/vue'
+const parallel = require('async-await-parallel')
 
 export default class CheckTable {
   constructor () {
@@ -21,59 +24,73 @@ export default class CheckTable {
     Vue.set(dataController.vueApp, 'tableready', null)
   }
 
-  async getData (dataController, langs = [], skipShortDefs = false, skipFullDefs = false) {
-    Vue.set(dataController.vueApp, 'tableready', false)
+  async getData (sourceData, vueApp, params) {
+    Vue.set(vueApp, 'tableready', false)
+    const res = await parallel(
+      sourceData.data.map(dataItem => async () => { await this.getDataWord(dataItem, vueApp, params) })
+      , sourceData.queue_max)
 
-    let sourceData = dataController.sourceData
-    for (let i = 0; i < sourceData.length; i++) {
-      let sourceItem = sourceData[i]
-      let lexQuery = new LexicalQuery(sourceItem)
-
-      let homonymData = await this.getMorphData(lexQuery, langs, skipShortDefs, skipFullDefs)
-      this.data.push(homonymData)
-
-      if (lexQuery.homonym && lexQuery.homonym.lexemes) {
-        lexQuery.homonym.lexemes.forEach(lex => { lex.meaning.shortDefs = [] })
-
-        if (lexQuery.lexiconShortOpts && !skipShortDefs) {
-          await this.getShortDefsData(lexQuery, homonymData)
-        }
-        if (lexQuery.lexiconFullOpts && !skipFullDefs) {
-          await this.getFullDefsData(lexQuery, homonymData)
-        }
-
-        if (langs.length > 0) {
-          await this.getLemmaTranslations(lexQuery, homonymData, langs)
-        }
-      }
-
-      Vue.set(dataController.vueApp, 'resulttable', this.data)
-    }
-    Vue.set(dataController.vueApp, 'tableready', true)
+    Vue.set(vueApp, 'tableready', true)
   }
 
-  async getMorphData (lexQuery, langs, skipShortDefs, skipFullDefs) {
-    let homonymData = {
-      targetWord: lexQuery.targetWord,
-      languageID: lexQuery.languageID,
-      languageName: lexQuery.languageName,
-      lexiconShortOpts: lexQuery.lexiconShortOpts,
-      lexiconFullOpts: lexQuery.lexiconFullOpts,
+  async getDataWord (dataItem, vueApp, params) {
+    let lexQuery = new LexicalQuery()
+    let res1 = await lexQuery.getMorphData(dataItem)
+    let rowData = this.formatHomonymData(dataItem, params)
+    this.data.push(rowData)
 
-      skipShortDefs: skipShortDefs,
-      skipFullDefs: skipFullDefs,
-      langs: langs,
+    if (dataItem.homonym && dataItem.homonym.lexemes && rowData.lexiconShortOpts.allow && !params.skipShortDefs) {
+      dataItem.homonym.lexemes.forEach(lex => { lex.meaning.shortDefs = [] })
+
+      let res2 = await lexQuery.prepareShortDefsRequests(dataItem, rowData)
+
+      if (rowData.definitionShortRequests && rowData.definitionShortRequests.length > 0) {
+        let res3 = await lexQuery.getDefs(rowData.definitionShortRequests)
+      }
+
+      this.formatShortDefsData(dataItem, rowData)
+    }
+
+    if (dataItem.homonym && dataItem.homonym.lexemes && rowData.lexiconFullOpts.allow && !params.skipFullDefs) {
+      let res2 = await lexQuery.prepareFullDefsRequests(dataItem, rowData)
+
+      if (rowData.definitionFullRequests && rowData.definitionFullRequests.length > 0) {
+        let res3 = await lexQuery.getDefs(rowData.definitionFullRequests)
+      }
+
+      this.formatFullDefsData(dataItem, rowData)
+    }
+
+    if (dataItem.homonym && dataItem.homonym.lexemes && params.langs && params.langs.length > 0) {
+      let langs = params.langs.map(lang => lang.code)
+      let res4 = await lexQuery.getLemmaTranslations(langs, dataItem, rowData)
+
+      this.formatTranslationsData(params.langs, dataItem, rowData)
+    }
+
+    Vue.set(vueApp, 'resulttable', this.data)
+  }
+
+  formatHomonymData (dataItem, params) {
+    let rowData = {
+      targetWord: dataItem.targetWord,
+      languageID: dataItem.languageID,
+      languageName: dataItem.languageName,
+      lexiconShortOpts: dataItem.lexiconShortOpts,
+      lexiconFullOpts: dataItem.lexiconFullOpts,
+
+      skipShortDefs: params.skipShortDefs,
+      skipFullDefs: params.skipFullDefs,
+      langs: params.langs,
 
       morphClient: false
     }
 
-    await lexQuery.getMorphData()
+    if (dataItem.homonym && dataItem.homonym.lexemes) {
+      rowData.morphClient = true
 
-    if (lexQuery.homonym && lexQuery.homonym.lexemes) {
-      homonymData.morphClient = true
-
-      homonymData.lexemes = []
-      lexQuery.homonym.lexemes.forEach(lexeme => {
+      rowData.lexemes = []
+      dataItem.homonym.lexemes.forEach(lexeme => {
         let lexemeData = { lemmaWord: lexeme.lemma.word, morphData: {} }
         lexemeData.morphData.principalParts = lexeme.lemma.principalParts.join('; ')
         for (let feature in lexeme.lemma.features) {
@@ -83,50 +100,42 @@ export default class CheckTable {
         if (lexeme.meaning.shortDefs.length > 0) {
           lexemeData.morphShortDefs = lexeme.meaning.shortDefs.map(def => def.text)
         }
-        homonymData.lexemes.push(lexemeData)
+        rowData.lexemes.push(lexemeData)
       })
     }
-
-    return homonymData
+    return rowData
   }
 
-  async getShortDefsData (lexQuery, homonymData) {
-    await lexQuery.getShortDefsData()
-
-    lexQuery.homonym.lexemes.forEach((lexeme, index) => {
-      homonymData.lexemes[index].shortDefData = { lexClient: false }
+  formatShortDefsData (dataItem, rowData) {
+    dataItem.homonym.lexemes.forEach((lexeme, index) => {
+      rowData.lexemes[index].shortDefData = { lexClient: false }
       if (lexeme.meaning.shortDefs.length > 0) {
-        homonymData.lexemes[index].shortDefData.lexClient = true
-        homonymData.lexemes[index].shortDefData.shortDefs = lexeme.meaning.shortDefs.map(def => { return { text: def.text, code: def.code, dict: def.dict } })
+        rowData.lexemes[index].shortDefData.lexClient = true
+        rowData.lexemes[index].shortDefData.shortDefs = lexeme.meaning.shortDefs.map(def => { return { text: def.text, code: def.code, dict: def.dict } })
       }
     })
   }
 
-  async getFullDefsData (lexQuery, homonymData) {
-    await lexQuery.getFullDefsData()
-
-    lexQuery.homonym.lexemes.forEach((lexeme, index) => {
-      homonymData.lexemes[index].fullDefData = { lexClient: false }
+  formatFullDefsData (dataItem, rowData) {
+    dataItem.homonym.lexemes.forEach((lexeme, index) => {
+      rowData.lexemes[index].fullDefData = { lexClient: false }
       if (lexeme.meaning.fullDefs.length > 0) {
-        homonymData.lexemes[index].fullDefData.lexClient = true
-        homonymData.lexemes[index].fullDefData.showAll = false
-        homonymData.lexemes[index].fullDefData.fullDefs = lexeme.meaning.fullDefs.map(def => { return { text: def.text, code: def.code, dict: def.dict } })
+        rowData.lexemes[index].fullDefData.lexClient = true
+        rowData.lexemes[index].fullDefData.fullDefs = lexeme.meaning.fullDefs.map(def => { return { text: def.text, code: def.code, dict: def.dict } })
       }
     })
   }
 
-  async getLemmaTranslations (lexQuery, homonymData, langs) {
-    await lexQuery.getLemmaTranslations(langs)
-
-    lexQuery.homonym.lexemes.forEach((lexeme, index) => {
-      homonymData.lexemes[index].translations = {}
+  formatTranslationsData (langs, dataItem, rowData) {
+    dataItem.homonym.lexemes.forEach((lexeme, index) => {
+      rowData.lexemes[index].translations = {}
       for (let lang of langs) {
         let curTrans = lexeme.lemma.translations.filter(trans => trans.languageCode === lang.property)
 
         if (curTrans.length === 0) {
-          homonymData.lexemes[index].translations[lang.property] = { languageCode: lang.property }
+          rowData.lexemes[index].translations[lang.property] = { languageCode: lang.property }
         } else {
-          homonymData.lexemes[index].translations[lang.property] = curTrans[0]
+          rowData.lexemes[index].translations[lang.property] = curTrans[0]
         }
       }
     })
