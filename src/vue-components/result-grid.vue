@@ -12,7 +12,7 @@
 
     <div class="alpheios-result-grid__file_block block2">
       <button v-on:click="uploadFile()" class="alpheios-result-grid__upload_file" :class="disabledClass(file)">Upload data</button>
-      <p class="alpheios-result-grid__file_name" v-if="sourceData">Words - {{ sourceData.data.length }}</p>
+      <p class="alpheios-result-grid__file_name" v-if="sourceData">Words - {{ wordsCount }}</p>
     </div>
       
     
@@ -188,6 +188,9 @@
     computed: {
       fileSize () {
       	return this.file ? Math.round(this.file.size/1024*100)/100 : null
+      },
+      wordsCount () {
+        return this.sourceData.data ? this.sourceData.data.length : this.sourceData.length
       },
       downloadEnabled () {
         let downloads = Object.keys(this.checkboxes).filter(key => this.checkboxes[key] && !this.langs.map(lang => lang.property).includes(key))

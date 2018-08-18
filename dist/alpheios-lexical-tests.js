@@ -49912,6 +49912,9 @@ __webpack_require__.r(__webpack_exports__);
       fileSize () {
       	return this.file ? Math.round(this.file.size/1024*100)/100 : null
       },
+      wordsCount () {
+        return this.sourceData.data ? this.sourceData.data.length : this.sourceData.length
+      },
       downloadEnabled () {
         let downloads = Object.keys(this.checkboxes).filter(key => this.checkboxes[key] && !this.langs.map(lang => lang.property).includes(key))
 
@@ -50252,7 +50255,7 @@ var render = function() {
       _vm._v(" "),
       _vm.sourceData
         ? _c("p", { staticClass: "alpheios-result-grid__file_name" }, [
-            _vm._v("Words - " + _vm._s(_vm.sourceData.data.length))
+            _vm._v("Words - " + _vm._s(_vm.wordsCount))
           ])
         : _vm._e()
     ]),
