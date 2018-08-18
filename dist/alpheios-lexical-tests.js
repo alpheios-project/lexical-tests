@@ -3797,7 +3797,7 @@ class LanguageModelFactory {
    */
   static getLanguageCodeFromId (languageID) {
     for (const languageModel of MODELS.values()) {
-      if (languageModel.languageID === languageID) {
+      if (languageModel.languageID.toString() === languageID.toString()) {
         return languageModel.languageCode
       }
     }
@@ -4124,6 +4124,7 @@ class Lemma {
     this.word = word
     this.principalParts = principalParts
     this.features = {}
+
     this.ID = uuid_v4__WEBPACK_IMPORTED_MODULE_2___default()()
   }
 
@@ -4709,6 +4710,1706 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ })
 /************************************************************************/
 /******/ ({
+
+/***/ "../node_modules/axios/index.js":
+/*!**************************************!*\
+  !*** ../node_modules/axios/index.js ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(/*! ./lib/axios */ "../node_modules/axios/lib/axios.js");
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/adapters/xhr.js":
+/*!*************************************************!*\
+  !*** ../node_modules/axios/lib/adapters/xhr.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "../node_modules/axios/lib/utils.js");
+var settle = __webpack_require__(/*! ./../core/settle */ "../node_modules/axios/lib/core/settle.js");
+var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ "../node_modules/axios/lib/helpers/buildURL.js");
+var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ "../node_modules/axios/lib/helpers/parseHeaders.js");
+var isURLSameOrigin = __webpack_require__(/*! ./../helpers/isURLSameOrigin */ "../node_modules/axios/lib/helpers/isURLSameOrigin.js");
+var createError = __webpack_require__(/*! ../core/createError */ "../node_modules/axios/lib/core/createError.js");
+var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(/*! ./../helpers/btoa */ "../node_modules/axios/lib/helpers/btoa.js");
+
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+    var loadEvent = 'onreadystatechange';
+    var xDomain = false;
+
+    // For IE 8/9 CORS support
+    // Only supports POST and GET calls and doesn't returns the response headers.
+    // DON'T do this for testing b/c XMLHttpRequest is mocked, not XDomainRequest.
+    if ("development" !== 'test' &&
+        typeof window !== 'undefined' &&
+        window.XDomainRequest && !('withCredentials' in request) &&
+        !isURLSameOrigin(config.url)) {
+      request = new window.XDomainRequest();
+      loadEvent = 'onload';
+      xDomain = true;
+      request.onprogress = function handleProgress() {};
+      request.ontimeout = function handleTimeout() {};
+    }
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password || '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    request.open(config.method.toUpperCase(), buildURL(config.url, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    // Listen for ready state
+    request[loadEvent] = function handleLoad() {
+      if (!request || (request.readyState !== 4 && !xDomain)) {
+        return;
+      }
+
+      // The request errored out and we didn't get a response, this will be
+      // handled by onerror instead
+      // With one exception: request that using file: protocol, most browsers
+      // will return status as 0 even though it's a successful request
+      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+        return;
+      }
+
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var response = {
+        data: responseData,
+        // IE sends 1223 instead of 204 (https://github.com/axios/axios/issues/201)
+        status: request.status === 1223 ? 204 : request.status,
+        statusText: request.status === 1223 ? 'No Content' : request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      var cookies = __webpack_require__(/*! ./../helpers/cookies */ "../node_modules/axios/lib/helpers/cookies.js");
+
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
+          cookies.read(config.xsrfCookieName) :
+          undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (config.withCredentials) {
+      request.withCredentials = true;
+    }
+
+    // Add responseType to request if needed
+    if (config.responseType) {
+      try {
+        request.responseType = config.responseType;
+      } catch (e) {
+        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+        if (config.responseType !== 'json') {
+          throw e;
+        }
+      }
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (requestData === undefined) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/axios.js":
+/*!******************************************!*\
+  !*** ../node_modules/axios/lib/axios.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./utils */ "../node_modules/axios/lib/utils.js");
+var bind = __webpack_require__(/*! ./helpers/bind */ "../node_modules/axios/lib/helpers/bind.js");
+var Axios = __webpack_require__(/*! ./core/Axios */ "../node_modules/axios/lib/core/Axios.js");
+var defaults = __webpack_require__(/*! ./defaults */ "../node_modules/axios/lib/defaults.js");
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios(defaultConfig);
+  var instance = bind(Axios.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(utils.merge(defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = __webpack_require__(/*! ./cancel/Cancel */ "../node_modules/axios/lib/cancel/Cancel.js");
+axios.CancelToken = __webpack_require__(/*! ./cancel/CancelToken */ "../node_modules/axios/lib/cancel/CancelToken.js");
+axios.isCancel = __webpack_require__(/*! ./cancel/isCancel */ "../node_modules/axios/lib/cancel/isCancel.js");
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = __webpack_require__(/*! ./helpers/spread */ "../node_modules/axios/lib/helpers/spread.js");
+
+module.exports = axios;
+
+// Allow use of default import syntax in TypeScript
+module.exports.default = axios;
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/cancel/Cancel.js":
+/*!**************************************************!*\
+  !*** ../node_modules/axios/lib/cancel/Cancel.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/cancel/CancelToken.js":
+/*!*******************************************************!*\
+  !*** ../node_modules/axios/lib/cancel/CancelToken.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Cancel = __webpack_require__(/*! ./Cancel */ "../node_modules/axios/lib/cancel/Cancel.js");
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/cancel/isCancel.js":
+/*!****************************************************!*\
+  !*** ../node_modules/axios/lib/cancel/isCancel.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/core/Axios.js":
+/*!***********************************************!*\
+  !*** ../node_modules/axios/lib/core/Axios.js ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var defaults = __webpack_require__(/*! ./../defaults */ "../node_modules/axios/lib/defaults.js");
+var utils = __webpack_require__(/*! ./../utils */ "../node_modules/axios/lib/utils.js");
+var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ "../node_modules/axios/lib/core/InterceptorManager.js");
+var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ "../node_modules/axios/lib/core/dispatchRequest.js");
+
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = utils.merge({
+      url: arguments[0]
+    }, arguments[1]);
+  }
+
+  config = utils.merge(defaults, {method: 'get'}, this.defaults, config);
+  config.method = config.method.toLowerCase();
+
+  // Hook up interceptors middleware
+  var chain = [dispatchRequest, undefined];
+  var promise = Promise.resolve(config);
+
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    chain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+module.exports = Axios;
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/core/InterceptorManager.js":
+/*!************************************************************!*\
+  !*** ../node_modules/axios/lib/core/InterceptorManager.js ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "../node_modules/axios/lib/utils.js");
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+module.exports = InterceptorManager;
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/core/createError.js":
+/*!*****************************************************!*\
+  !*** ../node_modules/axios/lib/core/createError.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var enhanceError = __webpack_require__(/*! ./enhanceError */ "../node_modules/axios/lib/core/enhanceError.js");
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+module.exports = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/core/dispatchRequest.js":
+/*!*********************************************************!*\
+  !*** ../node_modules/axios/lib/core/dispatchRequest.js ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "../node_modules/axios/lib/utils.js");
+var transformData = __webpack_require__(/*! ./transformData */ "../node_modules/axios/lib/core/transformData.js");
+var isCancel = __webpack_require__(/*! ../cancel/isCancel */ "../node_modules/axios/lib/cancel/isCancel.js");
+var defaults = __webpack_require__(/*! ../defaults */ "../node_modules/axios/lib/defaults.js");
+var isAbsoluteURL = __webpack_require__(/*! ./../helpers/isAbsoluteURL */ "../node_modules/axios/lib/helpers/isAbsoluteURL.js");
+var combineURLs = __webpack_require__(/*! ./../helpers/combineURLs */ "../node_modules/axios/lib/helpers/combineURLs.js");
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Support baseURL config
+  if (config.baseURL && !isAbsoluteURL(config.url)) {
+    config.url = combineURLs(config.baseURL, config.url);
+  }
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers || {}
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/core/enhanceError.js":
+/*!******************************************************!*\
+  !*** ../node_modules/axios/lib/core/enhanceError.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+module.exports = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+  error.request = request;
+  error.response = response;
+  return error;
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/core/settle.js":
+/*!************************************************!*\
+  !*** ../node_modules/axios/lib/core/settle.js ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var createError = __webpack_require__(/*! ./createError */ "../node_modules/axios/lib/core/createError.js");
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  // Note: status is not exposed by XDomainRequest
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/core/transformData.js":
+/*!*******************************************************!*\
+  !*** ../node_modules/axios/lib/core/transformData.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "../node_modules/axios/lib/utils.js");
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+module.exports = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/defaults.js":
+/*!*********************************************!*\
+  !*** ../node_modules/axios/lib/defaults.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+var utils = __webpack_require__(/*! ./utils */ "../node_modules/axios/lib/utils.js");
+var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ "../node_modules/axios/lib/helpers/normalizeHeaderName.js");
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = __webpack_require__(/*! ./adapters/xhr */ "../node_modules/axios/lib/adapters/xhr.js");
+  } else if (typeof process !== 'undefined') {
+    // For node use HTTP adapter
+    adapter = __webpack_require__(/*! ./adapters/http */ "../node_modules/axios/lib/adapters/xhr.js");
+  }
+  return adapter;
+}
+
+var defaults = {
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) { /* Ignore */ }
+    }
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../process/browser.js */ "../node_modules/process/browser.js")))
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/helpers/bind.js":
+/*!*************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/bind.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/helpers/btoa.js":
+/*!*************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/btoa.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
+
+var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+
+function E() {
+  this.message = 'String contains an invalid character';
+}
+E.prototype = new Error;
+E.prototype.code = 5;
+E.prototype.name = 'InvalidCharacterError';
+
+function btoa(input) {
+  var str = String(input);
+  var output = '';
+  for (
+    // initialize result and counter
+    var block, charCode, idx = 0, map = chars;
+    // if the next str index does not exist:
+    //   change the mapping table to "="
+    //   check if d has no fractional digits
+    str.charAt(idx | 0) || (map = '=', idx % 1);
+    // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
+    output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+  ) {
+    charCode = str.charCodeAt(idx += 3 / 4);
+    if (charCode > 0xFF) {
+      throw new E();
+    }
+    block = block << 8 | charCode;
+  }
+  return output;
+}
+
+module.exports = btoa;
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/helpers/buildURL.js":
+/*!*****************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/buildURL.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "../node_modules/axios/lib/utils.js");
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%40/gi, '@').
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+module.exports = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/helpers/combineURLs.js":
+/*!********************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/combineURLs.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/helpers/cookies.js":
+/*!****************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/cookies.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "../node_modules/axios/lib/utils.js");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+  (function standardBrowserEnv() {
+    return {
+      write: function write(name, value, expires, path, domain, secure) {
+        var cookie = [];
+        cookie.push(name + '=' + encodeURIComponent(value));
+
+        if (utils.isNumber(expires)) {
+          cookie.push('expires=' + new Date(expires).toGMTString());
+        }
+
+        if (utils.isString(path)) {
+          cookie.push('path=' + path);
+        }
+
+        if (utils.isString(domain)) {
+          cookie.push('domain=' + domain);
+        }
+
+        if (secure === true) {
+          cookie.push('secure');
+        }
+
+        document.cookie = cookie.join('; ');
+      },
+
+      read: function read(name) {
+        var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+        return (match ? decodeURIComponent(match[3]) : null);
+      },
+
+      remove: function remove(name) {
+        this.write(name, '', Date.now() - 86400000);
+      }
+    };
+  })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+  (function nonStandardBrowserEnv() {
+    return {
+      write: function write() {},
+      read: function read() { return null; },
+      remove: function remove() {}
+    };
+  })()
+);
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/helpers/isAbsoluteURL.js":
+/*!**********************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+module.exports = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/helpers/isURLSameOrigin.js":
+/*!************************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "../node_modules/axios/lib/utils.js");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+  (function standardBrowserEnv() {
+    var msie = /(msie|trident)/i.test(navigator.userAgent);
+    var urlParsingNode = document.createElement('a');
+    var originURL;
+
+    /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+    function resolveURL(url) {
+      var href = url;
+
+      if (msie) {
+        // IE needs attribute set twice to normalize properties
+        urlParsingNode.setAttribute('href', href);
+        href = urlParsingNode.href;
+      }
+
+      urlParsingNode.setAttribute('href', href);
+
+      // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+      return {
+        href: urlParsingNode.href,
+        protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+        host: urlParsingNode.host,
+        search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+        hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+        hostname: urlParsingNode.hostname,
+        port: urlParsingNode.port,
+        pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+                  urlParsingNode.pathname :
+                  '/' + urlParsingNode.pathname
+      };
+    }
+
+    originURL = resolveURL(window.location.href);
+
+    /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+    return function isURLSameOrigin(requestURL) {
+      var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+      return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+    };
+  })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+  (function nonStandardBrowserEnv() {
+    return function isURLSameOrigin() {
+      return true;
+    };
+  })()
+);
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/helpers/normalizeHeaderName.js":
+/*!****************************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ../utils */ "../node_modules/axios/lib/utils.js");
+
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/helpers/parseHeaders.js":
+/*!*********************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "../node_modules/axios/lib/utils.js");
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+module.exports = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/helpers/spread.js":
+/*!***************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/spread.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/axios/lib/utils.js":
+/*!******************************************!*\
+  !*** ../node_modules/axios/lib/utils.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var bind = __webpack_require__(/*! ./helpers/bind */ "../node_modules/axios/lib/helpers/bind.js");
+var isBuffer = __webpack_require__(/*! is-buffer */ "../node_modules/is-buffer/index.js");
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = merge(result[key], val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+module.exports = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  extend: extend,
+  trim: trim
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/is-buffer/index.js":
+/*!******************************************!*\
+  !*** ../node_modules/is-buffer/index.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+/*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+// The _isBuffer check is for Safari 5-7 support, because it's missing
+// Object.prototype.constructor. Remove this eventually
+module.exports = function (obj) {
+  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
+}
+
+function isBuffer (obj) {
+  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
+}
+
+// For Node v0.10 support. Remove this eventually.
+function isSlowBuffer (obj) {
+  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
+}
+
+
+/***/ }),
 
 /***/ "../node_modules/process/browser.js":
 /*!******************************************!*\
@@ -5956,6 +7657,10 @@ var _config_json__WEBPACK_IMPORTED_MODULE_0___namespace = /*#__PURE__*/__webpack
 /* harmony import */ var promise_polyfill__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(promise_polyfill__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var whatwg_fetch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! whatwg-fetch */ "../node_modules/whatwg-fetch/fetch.js");
 /* harmony import */ var whatwg_fetch__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(whatwg_fetch__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "../node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+
+
 
 
 
@@ -6026,12 +7731,8 @@ class AlpheiosLemmaTranslationsAdapter {
     }
     return null
   }
-  /**
-   * Loads a json data from a URL
-   * @param {string} url - the url
-   * @returns {Promise} a Promise that resolves to the text contents of the loaded file
-   */
-  _loadJSON (url) {
+
+  fetchWindow (url) {
     return new promise_polyfill__WEBPACK_IMPORTED_MODULE_1___default.a((resolve, reject) => {
       window.fetch(url, {
         method: 'GET',
@@ -6050,6 +7751,27 @@ class AlpheiosLemmaTranslationsAdapter {
           reject(error)
         })
     })
+  }
+
+  async fetchAxios (url) {
+    try {
+      let res = await axios__WEBPACK_IMPORTED_MODULE_3___default.a.get(encodeURI(url))
+      return res.data
+    } catch (err) {
+      // console.info('Error occured with translations', err.message)
+    }
+  }
+  /**
+   * Loads a json data from a URL
+   * @param {string} url - the url
+   * @returns {Promise} a Promise that resolves to the text contents of the loaded file
+   */
+  _loadJSON (url) {
+    if (typeof window !== 'undefined') {
+      return this.fetchWindow(url)
+    } else {
+      return this.fetchAxios(url)
+    }
   }
   /**
    * Get a configuration setting for this lemma client instance
@@ -20423,6 +22145,118 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_alpheios_data_models__;
 
 /******/ });
 });
+
+
+/***/ }),
+
+/***/ "../node_modules/async-await-parallel/index.js":
+/*!*****************************************************!*\
+  !*** ../node_modules/async-await-parallel/index.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = parallelMap
+module.exports.pool = parallelPool
+
+/**
+ * Invokes an array of async functions in parallel with a limit to the maximum
+ * number of concurrent invocations. Async functions are executed in-order and
+ * the results are mapped to the return array.
+ *
+ * Acts as a replacement for `await Promise.all([ ... ])` by limiting the max
+ * concurrency of the array of function invocations.
+ *
+ * If any single task fails (eg, returns a rejected Promise), the pool will drain
+ * any remaining active tasks and reject the resulting Promsie.
+ *
+ * @param {Array<async Function(Void) => Any>} thunks
+ * @param {Number?} concurrency Max concurrency (defaults to 5)
+ *
+ * @return {Promise<Array<Any>>}
+ */
+async function parallelMap (thunks, concurrency = 5) {
+  if (concurrency > 0) {
+    concurrency = Math.min(concurrency, thunks.length)
+  } else {
+    concurrency = thunks.length
+  }
+
+  let index = 0
+  let results = [ ]
+
+  await parallelPool(concurrency, async () => {
+    if (index < thunks.length) {
+      const currentIndex = index++
+      const thunk = thunks[currentIndex]
+      results[currentIndex] = await thunk.call(this)
+    }
+
+    return (index < thunks.length)
+  })
+
+  return results
+}
+
+/**
+ * Executes a given async `task` multiple times in parallel with a guaranteed
+ * max concurrency given by `size`.
+ *
+ * The task should be an async function which resolves to a boolean for whether
+ * or not there are more tasks to process.
+ *
+ * If any single task fails (eg, returns a rejected Promise), the pool will drain
+ * any remaining active tasks and reject the resulting Promsie.
+ *
+ * @param {Number} size
+ * @param {async Function(Void) => Boolean} task
+ *
+ * @return {Promise<Void>}
+ */
+async function parallelPool (size, task) {
+  let done = false
+  let active = 0
+  let errors = [ ]
+
+  return new Promise((resolve, reject) => {
+    function poolIterator () {
+      while (active < size && !done) {
+        active++
+
+        task()
+          .then((more) => {
+            if (--active <= 0 && (done || !more)) {
+              if (errors.length > 0) {
+                // at least one task failed
+                return reject(new Error(errors))
+              } else {
+                // all tasks completed successfully
+                return resolve()
+              }
+            } else if (more) {
+              poolIterator()
+            } else {
+              done = true
+            }
+          })
+          .catch((err) => {
+            errors.push(err)
+            done = true
+
+            if (--active <= 0) {
+              return reject(new Error(errors))
+            } else {
+              // wait until all active tasks are drained before rejecting the
+              // final result (no new tasks will be started now that we're in
+              // this error state)
+            }
+          })
+      }
+    }
+
+    poolIterator()
+  })
+}
 
 
 /***/ }),
@@ -48138,23 +49972,29 @@ __webpack_require__.r(__webpack_exports__);
       },
 
       checkSourceData () {
-        if (!Array.isArray(this.sourceData)) {
-          this.uploadError = 'File should contain an array of words, you should reload data.'
+
+        if (!Array.isArray(this.sourceData) && (typeof this.sourceData !== 'object') && (typeof this.sourceData === 'object' && !this.sourceData.data)) {
+          this.uploadError = 'File should contain an array of words or an object with property data, that contains an array of words.'
           this.sourceData = null
           return
         }
-        if (this.sourceData.some(word => !word.targetWord)) {
+
+        if (Array.isArray(this.sourceData)) {
+          this.sourceData = { data: this.sourceData.slice(0) }
+        }
+
+        if (this.sourceData.data.some(word => !word.targetWord)) {
           this.uploadError = 'Each word block in the file should contain targetWord property, you should reload data.'
           this.sourceData = null
           return
         }
-        if (this.sourceData.some(word => !word.languageCode)) {
+        if (this.sourceData.data.some(word => !word.languageCode)) {
           this.uploadError = 'Each word block in the file should contain languageCode property, you should reload data.'
           this.sourceData = null
           return
         }
 
-        this.sourceData.forEach(word => {
+        this.sourceData.data.forEach(word => {
           if (word.lexiconShortOpts && !word.lexiconShortOpts.codes) {
             word.lexiconShortOpts = { codes: [] }
           }
@@ -48412,7 +50252,7 @@ var render = function() {
       _vm._v(" "),
       _vm.sourceData
         ? _c("p", { staticClass: "alpheios-result-grid__file_name" }, [
-            _vm._v("Words - " + _vm._s(_vm.sourceData.length))
+            _vm._v("Words - " + _vm._s(_vm.sourceData.data.length))
           ])
         : _vm._e()
     ]),
@@ -48873,7 +50713,6 @@ var render = function() {
                               {
                                 staticClass:
                                   "alpheios-tests-results__grid__showLink",
-                                attrs: { href: "#" },
                                 on: {
                                   click: function($event) {
                                     $event.stopPropagation()
@@ -60148,8 +61987,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Embedded {
-  constructor (configFile, tabDelimiter) {
-    this.resultsId = 'alpheios-tests-results'
+  constructor (resultsId, configFile, tabDelimiter) {
+    this.resultsId = resultsId || 'alpheios-tests-results'
     this.dataController = new _lib_data_controller_js__WEBPACK_IMPORTED_MODULE_0__["default"](configFile, tabDelimiter)
     this.dataController.initVue()
   }
@@ -60176,8 +62015,11 @@ __webpack_require__.r(__webpack_exports__);
 /* eslint-env jest */
 /* eslint-disable no-unused-vars */
 
+/* eslint-env jest */
+/* eslint-disable no-unused-vars */
 
 
+const parallel = __webpack_require__(/*! async-await-parallel */ "../node_modules/async-await-parallel/index.js")
 
 class CheckTable {
   constructor () {
@@ -60196,59 +62038,73 @@ class CheckTable {
     vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', null)
   }
 
-  async getData (dataController, langs = [], skipShortDefs = false, skipFullDefs = false) {
-    vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', false)
+  async getData (sourceData, vueApp, params) {
+    vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(vueApp, 'tableready', false)
+    const res = await parallel(
+      sourceData.data.map(dataItem => async () => { await this.getDataWord(dataItem, vueApp, params) })
+      , sourceData.queue_max)
 
-    let sourceData = dataController.sourceData
-    for (let i = 0; i < sourceData.length; i++) {
-      let sourceItem = sourceData[i]
-      let lexQuery = new _lib_lexical_query_js__WEBPACK_IMPORTED_MODULE_0__["default"](sourceItem)
-
-      let homonymData = await this.getMorphData(lexQuery, langs, skipShortDefs, skipFullDefs)
-      this.data.push(homonymData)
-
-      if (lexQuery.homonym && lexQuery.homonym.lexemes) {
-        lexQuery.homonym.lexemes.forEach(lex => { lex.meaning.shortDefs = [] })
-
-        if (lexQuery.lexiconShortOpts && !skipShortDefs) {
-          await this.getShortDefsData(lexQuery, homonymData)
-        }
-        if (lexQuery.lexiconFullOpts && !skipFullDefs) {
-          await this.getFullDefsData(lexQuery, homonymData)
-        }
-
-        if (langs.length > 0) {
-          await this.getLemmaTranslations(lexQuery, homonymData, langs)
-        }
-      }
-
-      vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'resulttable', this.data)
-    }
-    vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(dataController.vueApp, 'tableready', true)
+    vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(vueApp, 'tableready', true)
   }
 
-  async getMorphData (lexQuery, langs, skipShortDefs, skipFullDefs) {
-    let homonymData = {
-      targetWord: lexQuery.targetWord,
-      languageID: lexQuery.languageID,
-      languageName: lexQuery.languageName,
-      lexiconShortOpts: lexQuery.lexiconShortOpts,
-      lexiconFullOpts: lexQuery.lexiconFullOpts,
+  async getDataWord (dataItem, vueApp, params) {
+    let lexQuery = new _lib_lexical_query_js__WEBPACK_IMPORTED_MODULE_0__["default"]()
+    let res1 = await lexQuery.getMorphData(dataItem)
+    let rowData = this.formatHomonymData(dataItem, params)
+    this.data.push(rowData)
 
-      skipShortDefs: skipShortDefs,
-      skipFullDefs: skipFullDefs,
-      langs: langs,
+    if (dataItem.homonym && dataItem.homonym.lexemes && rowData.lexiconShortOpts.allow && !params.skipShortDefs) {
+      dataItem.homonym.lexemes.forEach(lex => { lex.meaning.shortDefs = [] })
+
+      let res2 = await lexQuery.prepareShortDefsRequests(dataItem, rowData)
+
+      if (rowData.definitionShortRequests && rowData.definitionShortRequests.length > 0) {
+        let res3 = await lexQuery.getDefs(rowData.definitionShortRequests)
+      }
+
+      this.formatShortDefsData(dataItem, rowData)
+    }
+
+    if (dataItem.homonym && dataItem.homonym.lexemes && rowData.lexiconFullOpts.allow && !params.skipFullDefs) {
+      let res2 = await lexQuery.prepareFullDefsRequests(dataItem, rowData)
+
+      if (rowData.definitionFullRequests && rowData.definitionFullRequests.length > 0) {
+        let res3 = await lexQuery.getDefs(rowData.definitionFullRequests)
+      }
+
+      this.formatFullDefsData(dataItem, rowData)
+    }
+
+    if (dataItem.homonym && dataItem.homonym.lexemes && params.langs && params.langs.length > 0) {
+      let langs = params.langs.map(lang => lang.code)
+      let res4 = await lexQuery.getLemmaTranslations(langs, dataItem, rowData)
+
+      this.formatTranslationsData(params.langs, dataItem, rowData)
+    }
+
+    vue_dist_vue__WEBPACK_IMPORTED_MODULE_1___default.a.set(vueApp, 'resulttable', this.data)
+  }
+
+  formatHomonymData (dataItem, params) {
+    let rowData = {
+      targetWord: dataItem.targetWord,
+      languageID: dataItem.languageID,
+      languageName: dataItem.languageName,
+      lexiconShortOpts: dataItem.lexiconShortOpts,
+      lexiconFullOpts: dataItem.lexiconFullOpts,
+
+      skipShortDefs: params.skipShortDefs,
+      skipFullDefs: params.skipFullDefs,
+      langs: params.langs,
 
       morphClient: false
     }
 
-    await lexQuery.getMorphData()
+    if (dataItem.homonym && dataItem.homonym.lexemes) {
+      rowData.morphClient = true
 
-    if (lexQuery.homonym && lexQuery.homonym.lexemes) {
-      homonymData.morphClient = true
-
-      homonymData.lexemes = []
-      lexQuery.homonym.lexemes.forEach(lexeme => {
+      rowData.lexemes = []
+      dataItem.homonym.lexemes.forEach(lexeme => {
         let lexemeData = { lemmaWord: lexeme.lemma.word, morphData: {} }
         lexemeData.morphData.principalParts = lexeme.lemma.principalParts.join('; ')
         for (let feature in lexeme.lemma.features) {
@@ -60258,50 +62114,42 @@ class CheckTable {
         if (lexeme.meaning.shortDefs.length > 0) {
           lexemeData.morphShortDefs = lexeme.meaning.shortDefs.map(def => def.text)
         }
-        homonymData.lexemes.push(lexemeData)
+        rowData.lexemes.push(lexemeData)
       })
     }
-
-    return homonymData
+    return rowData
   }
 
-  async getShortDefsData (lexQuery, homonymData) {
-    await lexQuery.getShortDefsData()
-
-    lexQuery.homonym.lexemes.forEach((lexeme, index) => {
-      homonymData.lexemes[index].shortDefData = { lexClient: false }
+  formatShortDefsData (dataItem, rowData) {
+    dataItem.homonym.lexemes.forEach((lexeme, index) => {
+      rowData.lexemes[index].shortDefData = { lexClient: false }
       if (lexeme.meaning.shortDefs.length > 0) {
-        homonymData.lexemes[index].shortDefData.lexClient = true
-        homonymData.lexemes[index].shortDefData.shortDefs = lexeme.meaning.shortDefs.map(def => { return { text: def.text, code: def.code, dict: def.dict } })
+        rowData.lexemes[index].shortDefData.lexClient = true
+        rowData.lexemes[index].shortDefData.shortDefs = lexeme.meaning.shortDefs.map(def => { return { text: def.text, code: def.code, dict: def.dict } })
       }
     })
   }
 
-  async getFullDefsData (lexQuery, homonymData) {
-    await lexQuery.getFullDefsData()
-
-    lexQuery.homonym.lexemes.forEach((lexeme, index) => {
-      homonymData.lexemes[index].fullDefData = { lexClient: false }
+  formatFullDefsData (dataItem, rowData) {
+    dataItem.homonym.lexemes.forEach((lexeme, index) => {
+      rowData.lexemes[index].fullDefData = { lexClient: false }
       if (lexeme.meaning.fullDefs.length > 0) {
-        homonymData.lexemes[index].fullDefData.lexClient = true
-        homonymData.lexemes[index].fullDefData.showAll = false
-        homonymData.lexemes[index].fullDefData.fullDefs = lexeme.meaning.fullDefs.map(def => { return { text: def.text, code: def.code, dict: def.dict } })
+        rowData.lexemes[index].fullDefData.lexClient = true
+        rowData.lexemes[index].fullDefData.fullDefs = lexeme.meaning.fullDefs.map(def => { return { text: def.text, code: def.code, dict: def.dict } })
       }
     })
   }
 
-  async getLemmaTranslations (lexQuery, homonymData, langs) {
-    await lexQuery.getLemmaTranslations(langs)
-
-    lexQuery.homonym.lexemes.forEach((lexeme, index) => {
-      homonymData.lexemes[index].translations = {}
+  formatTranslationsData (langs, dataItem, rowData) {
+    dataItem.homonym.lexemes.forEach((lexeme, index) => {
+      rowData.lexemes[index].translations = {}
       for (let lang of langs) {
         let curTrans = lexeme.lemma.translations.filter(trans => trans.languageCode === lang.property)
 
         if (curTrans.length === 0) {
-          homonymData.lexemes[index].translations[lang.property] = { languageCode: lang.property }
+          rowData.lexemes[index].translations[lang.property] = { languageCode: lang.property }
         } else {
-          homonymData.lexemes[index].translations[lang.property] = curTrans[0]
+          rowData.lexemes[index].translations[lang.property] = curTrans[0]
         }
       }
     })
@@ -60688,50 +62536,25 @@ class CheckTable {
 
 /***/ }),
 
-/***/ "./lib/data-controller.js":
-/*!********************************!*\
-  !*** ./lib/data-controller.js ***!
-  \********************************/
+/***/ "./lib/config-controller.js":
+/*!**********************************!*\
+  !*** ./lib/config-controller.js ***!
+  \**********************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return DataController; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ConfigController; });
 /* harmony import */ var _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/lib/file-controller.js */ "./lib/file-controller.js");
-/* harmony import */ var _lib_download_controller_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/lib/download-controller.js */ "./lib/download-controller.js");
-/* harmony import */ var alpheios_data_models__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! alpheios-data-models */ "../node_modules/alpheios-data-models/dist/alpheios-data-models.js");
-/* harmony import */ var alpheios_data_models__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(alpheios_data_models__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _vue_components_result_grid_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/vue-components/result-grid.vue */ "./vue-components/result-grid.vue");
-/* harmony import */ var vue_dist_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vue/dist/vue */ "../node_modules/vue/dist/vue.js");
-/* harmony import */ var vue_dist_vue__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(vue_dist_vue__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _templates_template_htmlf__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/templates/template.htmlf */ "./templates/template.htmlf");
-/* harmony import */ var _templates_template_htmlf__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_templates_template_htmlf__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var _lib_check_table_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/lib/check-table.js */ "./lib/check-table.js");
-/* eslint-env jest */
-/* eslint-disable no-unused-vars */
+/* harmony import */ var alpheios_data_models__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! alpheios-data-models */ "../node_modules/alpheios-data-models/dist/alpheios-data-models.js");
+/* harmony import */ var alpheios_data_models__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(alpheios_data_models__WEBPACK_IMPORTED_MODULE_1__);
 
 
 
-
-
-
-
-
-
-
-
-
-class DataController {
-  constructor (configFile = 'libraryConfig.json', tabDelimiter = '\t') {
+class ConfigController {
+  constructor (configFile) {
     this.configFile = configFile
-    this.resultData = new _lib_check_table_js__WEBPACK_IMPORTED_MODULE_6__["default"]()
-    this.tabDelimiter = tabDelimiter
-  }
-
-  async initVue () {
-    await this.loadConfigData()
-    this.createVueApp()
   }
 
   async loadConfigData () {
@@ -60752,22 +62575,11 @@ class DataController {
     let langRes = {}
     for (let lang in languagesRaw) {
       langRes[lang] = {
-        const: alpheios_data_models__WEBPACK_IMPORTED_MODULE_2__["Constants"]['LANG_' + languagesRaw[lang].toUpperCase()],
+        const: alpheios_data_models__WEBPACK_IMPORTED_MODULE_1__["Constants"]['LANG_' + languagesRaw[lang].toUpperCase()],
         name: languagesRaw[lang]
       }
     }
     return langRes
-  }
-
-  prepareSourceData (sourceData) {
-    sourceData.forEach(dataItem => {
-      dataItem.languageID = this.languages[dataItem.languageCode].const
-      dataItem.languageName = this.languages[dataItem.languageCode].name
-      this.prepareLexicalConfigs(dataItem.lexiconShortOpts, dataItem.languageCode)
-      this.prepareLexicalConfigs(dataItem.lexiconFullOpts, dataItem.languageCode)
-    })
-    sourceData.sort(function (a, b) { return a.languageCode < b.languageCode })
-    this.sourceData = sourceData
   }
 
   prepareLexicalConfigs (defOpts, languageCode) {
@@ -60780,6 +62592,66 @@ class DataController {
       defOpts.allow = defOpts.codes.map(code => this.dictionaries[code].url)
       defOpts.dicts = defOpts.codes.map(code => `${code} (${this.dictionaries[code].name})`)
     }
+  }
+}
+
+
+/***/ }),
+
+/***/ "./lib/data-controller.js":
+/*!********************************!*\
+  !*** ./lib/data-controller.js ***!
+  \********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return DataController; });
+/* harmony import */ var _lib_file_controller_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/lib/file-controller.js */ "./lib/file-controller.js");
+/* harmony import */ var _lib_download_controller_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/lib/download-controller.js */ "./lib/download-controller.js");
+/* harmony import */ var _lib_config_controller_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/lib/config-controller.js */ "./lib/config-controller.js");
+/* harmony import */ var _vue_components_result_grid_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/vue-components/result-grid.vue */ "./vue-components/result-grid.vue");
+/* harmony import */ var vue_dist_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vue/dist/vue */ "../node_modules/vue/dist/vue.js");
+/* harmony import */ var vue_dist_vue__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(vue_dist_vue__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _templates_template_htmlf__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/templates/template.htmlf */ "./templates/template.htmlf");
+/* harmony import */ var _templates_template_htmlf__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_templates_template_htmlf__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _lib_check_table_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/lib/check-table.js */ "./lib/check-table.js");
+/* eslint-env jest */
+/* eslint-disable no-unused-vars */
+
+
+
+
+
+
+
+
+
+
+
+class DataController {
+  constructor (configFile = 'libraryConfig.json', tabDelimiter = '\t') {
+    this.configC = new _lib_config_controller_js__WEBPACK_IMPORTED_MODULE_2__["default"](configFile)
+    this.resultData = new _lib_check_table_js__WEBPACK_IMPORTED_MODULE_6__["default"]()
+    this.tabDelimiter = tabDelimiter
+    this.defaultQueueMax = 2
+  }
+
+  async initVue () {
+    await this.configC.loadConfigData()
+    this.createVueApp()
+  }
+
+  prepareSourceData (sourceData) {
+    sourceData.queue_max = sourceData.queue_max ? parseInt(sourceData.queue_max) : this.defaultQueueMax
+    sourceData.data.forEach(dataItem => {
+      dataItem.languageID = this.configC.languages[dataItem.languageCode].const
+      dataItem.languageName = this.configC.languages[dataItem.languageCode].name
+      this.configC.prepareLexicalConfigs(dataItem.lexiconShortOpts, dataItem.languageCode)
+      this.configC.prepareLexicalConfigs(dataItem.lexiconFullOpts, dataItem.languageCode)
+    })
+    sourceData.data.sort(function (a, b) { return a.languageCode < b.languageCode })
   }
 
   createVueApp () {
@@ -60794,7 +62666,7 @@ class DataController {
         return {
           resulttable: [],
           tableready: null,
-          translationlangs: dataController.translationlangs
+          translationlangs: dataController.configC.translationlangs
         }
       },
       methods: {
@@ -60830,7 +62702,7 @@ class DataController {
 
         getdata (sourceData, langs, skipShortDefs, skipFullDefs) {
           dataController.prepareSourceData(sourceData)
-          dataController.resultData.getData(dataController, langs, skipShortDefs, skipFullDefs)
+          dataController.resultData.getData(sourceData, this, { langs, skipShortDefs, skipFullDefs })
         },
 
         clearresulttable () {
@@ -61013,62 +62885,94 @@ class FileController {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return LexicalQuery; });
-/* harmony import */ var alpheios_data_models__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! alpheios-data-models */ "../node_modules/alpheios-data-models/dist/alpheios-data-models.js");
-/* harmony import */ var alpheios_data_models__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(alpheios_data_models__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var alpheios_morph_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! alpheios-morph-client */ "../node_modules/alpheios-morph-client/dist/alpheios-morph-client.js");
-/* harmony import */ var alpheios_morph_client__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(alpheios_morph_client__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! alpheios-lexicon-client */ "../node_modules/alpheios-lexicon-client/dist/alpheios-lexicon-client.js");
-/* harmony import */ var alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var alpheios_morph_client__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! alpheios-morph-client */ "../node_modules/alpheios-morph-client/dist/alpheios-morph-client.js");
+/* harmony import */ var alpheios_morph_client__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(alpheios_morph_client__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! alpheios-lexicon-client */ "../node_modules/alpheios-lexicon-client/dist/alpheios-lexicon-client.js");
+/* harmony import */ var alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var alpheios_data_models__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! alpheios-data-models */ "../node_modules/alpheios-data-models/dist/alpheios-data-models.js");
+/* harmony import */ var alpheios_data_models__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(alpheios_data_models__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var alpheios_lemma_client__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! alpheios-lemma-client */ "../node_modules/alpheios-lemma-client/dist/alpheios-lemma-client.js");
 /* harmony import */ var alpheios_lemma_client__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(alpheios_lemma_client__WEBPACK_IMPORTED_MODULE_3__);
+/* eslint-env jest */
 /* eslint-disable no-unused-vars */
 
 
 
 
 
+
 class LexicalQuery {
-  constructor (params) {
-    this.targetWord = params.targetWord
-    this.languageID = params.languageID
-    this.languageName = params.languageName
-
-    this.maAdapter = new alpheios_morph_client__WEBPACK_IMPORTED_MODULE_1__["AlpheiosTuftsAdapter"]()
-    this.lexicons = alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_2__["Lexicons"]
-
-    this.lexiconShortOpts = params.lexiconShortOpts
-    this.lexiconFullOpts = params.lexiconFullOpts
+  constructor () {
+    this.maAdapter = new alpheios_morph_client__WEBPACK_IMPORTED_MODULE_0__["AlpheiosTuftsAdapter"]()
   }
 
-  async getMorphData () {
+  async getMorphData (dataItem) {
     try {
-      this.homonym = await this.maAdapter.getHomonym(this.languageID, this.targetWord)
+      let homonym = await this.maAdapter.getHomonym(dataItem.languageID, dataItem.targetWord)
+      dataItem.homonym = homonym
     } catch (error) {
-      console.error(`maAdapter.getHomonym - ${error.message}`)
+      console.error(`Problems with fetching morph data - ${error.message}`)
+      return 'no'
     }
   }
 
-  async getShortDefsData () {
+  async prepareShortDefsRequests (dataItem, rowData) {
     let definitionRequests = []
 
-    for (let i = 0; i < this.lexiconShortOpts.allow.length; i++) {
-      let curOpts = { allow: [ this.lexiconShortOpts.allow[i] ], code: this.lexiconShortOpts.codes[i], dict: this.lexiconShortOpts.dicts[i] }
+    for (let i = 0; i < rowData.lexiconShortOpts.allow.length; i++) {
+      let curOpts = { allow: [ rowData.lexiconShortOpts.allow[i] ], code: rowData.lexiconShortOpts.codes[i], dict: rowData.lexiconShortOpts.dicts[i] }
 
-      for (let lexeme of this.homonym.lexemes) {
-        let requests = this.lexicons.fetchShortDefs(lexeme.lemma, curOpts)
-        definitionRequests = definitionRequests.concat(requests.map(request => {
-          return {
-            request: request,
-            type: 'Short definition',
-            lexeme: lexeme,
-            appendFunction: 'appendShortDefs',
-            complete: false,
-            dict: curOpts.dict
-          }
-        }))
+      for (let lexeme of dataItem.homonym.lexemes) {
+        try {
+          let requests = await alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_1__["Lexicons"].fetchShortDefs(lexeme.lemma, curOpts)
+          definitionRequests = definitionRequests.concat(requests.map(request => {
+            return {
+              request: request,
+              type: 'Short definition',
+              lexeme: lexeme,
+              appendFunction: 'appendShortDefs',
+              complete: false,
+              dict: curOpts.dict
+            }
+          }))
+        } catch (error) {
+          console.error(`Problems with fetching shortDefsRequests - ${error.message}`)
+        }
       }
     }
 
+    rowData.definitionShortRequests = definitionRequests
+  }
+
+  async prepareFullDefsRequests (dataItem, rowData) {
+    let definitionRequests = []
+
+    for (let i = 0; i < rowData.lexiconFullOpts.allow.length; i++) {
+      let curOpts = { allow: [ rowData.lexiconFullOpts.allow[i] ], code: rowData.lexiconFullOpts.codes[i], dict: rowData.lexiconFullOpts.dicts[i] }
+
+      for (let lexeme of dataItem.homonym.lexemes) {
+        try {
+          let requests = await alpheios_lexicon_client__WEBPACK_IMPORTED_MODULE_1__["Lexicons"].fetchFullDefs(lexeme.lemma, curOpts)
+          definitionRequests = definitionRequests.concat(requests.map(request => {
+            return {
+              request: request,
+              type: 'Full definition',
+              lexeme: lexeme,
+              appendFunction: 'appendFullDefs',
+              complete: false,
+              dict: curOpts.dict
+            }
+          }))
+        } catch (error) {
+          console.error(`Problems with fetching fullDefsRequests - ${error.message}`)
+        }
+      }
+    }
+
+    rowData.definitionFullRequests = definitionRequests
+  }
+
+  async getDefs (definitionRequests) {
     for (let definitionRequest of definitionRequests) {
       try {
         let definition = await definitionRequest.request
@@ -61079,57 +62983,22 @@ class LexicalQuery {
         definitionRequest.lexeme.meaning[definitionRequest.appendFunction](definition)
       } catch (error) {
         definitionRequest.lexeme.meaning.appendShortDefs({ dict: definitionRequest.dict })
-        console.error(`${definitionRequest.type}(s) request failed: ${error}`)
+        console.error(`${definitionRequest.type}(s) request failed: ${error.message}`)
       }
     }
   }
 
-  async getFullDefsData () {
-    let definitionRequests = []
+  async getLemmaTranslations (langs, dataItem, rowData) {
+    let languageCode = alpheios_data_models__WEBPACK_IMPORTED_MODULE_2__["LanguageModelFactory"].getLanguageCodeFromId(rowData.languageID)
 
-    for (let i = 0; i < this.lexiconFullOpts.allow.length; i++) {
-      let curOpts = { allow: [ this.lexiconFullOpts.allow[i] ], code: this.lexiconFullOpts.codes[i], dict: this.lexiconFullOpts.dicts[i] }
-
-      for (let lexeme of this.homonym.lexemes) {
-        let requests = this.lexicons.fetchFullDefs(lexeme.lemma, curOpts)
-        definitionRequests = definitionRequests.concat(requests.map(request => {
-          return {
-            request: request,
-            type: 'Full definition',
-            lexeme: lexeme,
-            appendFunction: 'appendFullDefs',
-            complete: false,
-            dict: curOpts.dict
-          }
-        }))
-      }
-    }
-    for (let definitionRequest of definitionRequests) {
-      try {
-        let definition = await definitionRequest.request
-        console.log(`${definitionRequest.type}(s) received:`, definition)
-
-        definition.forEach(def => { def.dict = definitionRequest.dict })
-
-        definitionRequest.lexeme.meaning[definitionRequest.appendFunction](definition)
-      } catch (error) {
-        definitionRequest.lexeme.meaning.appendFullDefs({ dict: definitionRequest.dict })
-        console.error(`${definitionRequest.type}(s) request failed: ${error}`)
-      }
-    }
-  }
-
-  async getLemmaTranslations (langs) {
-    let languageCode = alpheios_data_models__WEBPACK_IMPORTED_MODULE_0__["LanguageModelFactory"].getLanguageCodeFromId(this.languageID)
-
-    for (let lexeme of this.homonym.lexemes) {
+    for (let lexeme of dataItem.homonym.lexemes) {
       lexeme.lemma.translations = []
       for (let lang of langs) {
         try {
-          let resTranslations = await alpheios_lemma_client__WEBPACK_IMPORTED_MODULE_3__["LemmaTranslations"].fetchTranslations([ lexeme.lemma ], languageCode, lang.code)
+          let resTranslations = await alpheios_lemma_client__WEBPACK_IMPORTED_MODULE_3__["LemmaTranslations"].fetchTranslations([ lexeme.lemma ], languageCode, lang)
           lexeme.lemma.translations.push(lexeme.lemma.translation)
         } catch (err) {
-          console.error('Problems with fetching for', lang, err.message)
+          console.error('Problems with fetching translations for', err.message)
         }
       }
     }

@@ -12,7 +12,7 @@
 
     <div class="alpheios-result-grid__file_block block2">
       <button v-on:click="uploadFile()" class="alpheios-result-grid__upload_file" :class="disabledClass(file)">Upload data</button>
-      <p class="alpheios-result-grid__file_name" v-if="sourceData">Words - {{ sourceData.length }}</p>
+      <p class="alpheios-result-grid__file_name" v-if="sourceData">Words - {{ sourceData.data.length }}</p>
     </div>
       
     
@@ -101,7 +101,7 @@
               <td>
                 <div v-if="lexeme.fullDefData">
                   <p class="alpheios-tests-results__grid__result" :class="emptyClass(lexeme.fullDefData.lexClient)">{{ boolenToStr(lexeme.fullDefData.lexClient) }}</p>
-                   <a class="alpheios-tests-results__grid__showLink" href="#" @click.stop="showAllClick(lexeme)">{{showAllText(lexeme)}}</a>
+                   <a class="alpheios-tests-results__grid__showLink" @click.stop="showAllClick(lexeme)">{{showAllText(lexeme)}}</a>
                   <div class="alpheios-tests-results__grid__fulldefs" 
                        v-for="fullDef in lexeme.fullDefData.fullDefs" 
                        :class="{showAll: lexeme.fullDefData.showAll}">
@@ -249,23 +249,29 @@
       },
 
       checkSourceData () {
-        if (!Array.isArray(this.sourceData)) {
-          this.uploadError = 'File should contain an array of words, you should reload data.'
+
+        if (!Array.isArray(this.sourceData) && (typeof this.sourceData !== 'object') && (typeof this.sourceData === 'object' && !this.sourceData.data)) {
+          this.uploadError = 'File should contain an array of words or an object with property data, that contains an array of words.'
           this.sourceData = null
           return
         }
-        if (this.sourceData.some(word => !word.targetWord)) {
+
+        if (Array.isArray(this.sourceData)) {
+          this.sourceData = { data: this.sourceData.slice(0) }
+        }
+
+        if (this.sourceData.data.some(word => !word.targetWord)) {
           this.uploadError = 'Each word block in the file should contain targetWord property, you should reload data.'
           this.sourceData = null
           return
         }
-        if (this.sourceData.some(word => !word.languageCode)) {
+        if (this.sourceData.data.some(word => !word.languageCode)) {
           this.uploadError = 'Each word block in the file should contain languageCode property, you should reload data.'
           this.sourceData = null
           return
         }
 
-        this.sourceData.forEach(word => {
+        this.sourceData.data.forEach(word => {
           if (word.lexiconShortOpts && !word.lexiconShortOpts.codes) {
             word.lexiconShortOpts = { codes: [] }
           }
