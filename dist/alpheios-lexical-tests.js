@@ -63056,7 +63056,7 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 
 /* hot reload */
 if (false) { var api; }
-component.options.__file = "vue-components\\checkbox-block.vue"
+component.options.__file = "vue-components/checkbox-block.vue"
 /* harmony default export */ __webpack_exports__["default"] = (component.exports);
 
 /***/ }),
@@ -63143,7 +63143,7 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 
 /* hot reload */
 if (false) { var api; }
-component.options.__file = "vue-components\\result-grid.vue"
+component.options.__file = "vue-components/result-grid.vue"
 /* harmony default export */ __webpack_exports__["default"] = (component.exports);
 
 /***/ }),
